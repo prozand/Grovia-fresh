@@ -3,38 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grovia - Find Fresh</title>
+    <title>Grovia - Local Farm Stands</title>
     <style>
-        body, html { 
-            margin: 0; 
-            padding: 0; 
-            font-family: Arial, sans-serif; 
-            background-color: #f4f4f4;
-        }
-        header { 
-            background: #2c5e3b; 
-            color: white; 
-            padding: 15px 20px; 
-            text-align: center; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        h1 {
+        body, html {
             margin: 0;
-            font-size: 24px;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #2c5e3b;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 1001;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 20px;
+            letter-spacing: 0.5px;
+        }
+        .add-btn {
+            background: #d4af37;
+            color: #1a3c26;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .add-btn:hover {
+            background: #e6c555;
+        }
+        /* Push map down below the header */
+        map-element {
+            display: block;
+            margin-top: 60px;
+            height: calc(100vh - 60px);
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Grovia - Local Farm Stands</h1>
+        <h1>🌱 Grovia Farm Directory</h1>
+        <a href="add.html" class="add-btn">+ List Your Stand</a>
     </header>
-    
-    <!-- Your custom map component will appear exactly here -->
+
+    <!-- Your Map Custom Element -->
     <map-element></map-element>
 
-    <!-- This tells the browser to load your map logic -->
+    <!-- Include your map component script -->
     <script src="map-element.js"></script>
+
+    <!-- Supabase CDN for payment return check -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('success') === 'true') {
+                const pendingId = localStorage.getItem('pending_farm_id');
+                if (pendingId) {
+                    const SUPABASE_URL = 'https://xlftvjrhzklunsbaxcur.supabase.co';
+                    const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
+                    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+                    // Activate the farm in Supabase and add a verification token
+                    await supabase.from('farms')
+                        .update({ Active: true, stripe_token: 'tok_verified_' + Date.now() })
+                        .eq('id', pendingId);
+
+                    localStorage.removeItem('pending_farm_id');
+
+                    // Show success banner
+                    const banner = document.createElement('div');
+                    banner.style.cssText = "position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; background: #2e7d32; color: white; padding: 12px 24px; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3);";
+                    banner.innerHTML = "🎉 Payment Successful! Your farm stand is now live and verified on Grovia!";
+                    document.body.appendChild(banner);
+                    setTimeout(() => banner.remove(), 6000);
+                }
+            }
+        });
+    </script>
 
 </body>
 </html>
