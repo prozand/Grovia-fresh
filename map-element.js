@@ -70,7 +70,7 @@ class GroviaMapElement extends HTMLElement {
 
         let farms = [];
         try {
-            const { data, error } = await supabase.from('farms').select('*').eq('active', true);
+            const { data, error } = await supabase.from('farms').select('*').eq('Active', true);
             if (error) throw error;
             if (data) farms = data;
         } catch (err) {
@@ -79,7 +79,10 @@ class GroviaMapElement extends HTMLElement {
         }
 
         farms.forEach(farm => {
-            if (!farm.latitude || !farm.longitude) return;
+            // Using your exact capitalized column names from Supabase
+            const lat = farm.Latitude;
+            const lng = farm.Longitude;
+            if (!lat || !lng) return;
 
             const customIcon = L.divIcon({
                 className: 'custom-farm-marker',
@@ -89,30 +92,24 @@ class GroviaMapElement extends HTMLElement {
                 popupAnchor: [0, -20]
             });
 
-            const marker = L.marker([farm.latitude, farm.longitude], { icon: customIcon }).addTo(map);
+            const marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
             
-            const streetNum = farm.street_number || '';
-            const streetName = farm.street_name || '';
-            const postalCode = farm.postal_code || '';
-            const town = farm.town || '';
-            const province = farm.province || 'ON';
+            const address = farm.Address || 'Ontario';
+            const products = farm.Products || 'Farm Fresh Goods';
+            const title = farm.title || 'Grovia Stand';
 
-            const fullAddress = `${streetNum} ${streetName}, ${town}, ${province} ${postalCode}`.trim();
-            const verifiedBadge = farm.stripe_token ? '<br><small style="color: #2e7d32; font-weight: bold;">✔ Verified Paid Stand</small>' : '';
-
-            // HOVER TOOLTIP: Quick preview on mouseover
-            marker.bindTooltip(`<b>${farm.title || 'Grovia Stand'}</b><br><em>Click for details</em>`, {
+            // HOVER TOOLTIP
+            marker.bindTooltip(`<b>${title}</b><br><em>Click for details</em>`, {
                 direction: 'top',
                 offset: [0, -15]
             });
 
-            // CLICK POPUP: Detailed view
+            // CLICK POPUP
             marker.bindPopup(`
                 <div style="font-size: 14px; line-height: 1.4; padding: 4px; min-width: 180px;">
-                    <strong style="color: #2c5e3b; font-size: 15px;">${farm.title || 'Grovia Stand'}</strong><br>
-                    📍 ${fullAddress}<br>
-                    <em>🥚 ${farm.products || ''}</em>
-                    ${verifiedBadge}
+                    <strong style="color: #2c5e3b; font-size: 15px;">${title}</strong><br>
+                    📍 ${address}<br>
+                    <em>🥚 ${products}</em>
                 </div>
             `);
         });
@@ -144,7 +141,7 @@ class GroviaMapElement extends HTMLElement {
 
             let nearbyCount = 0;
             farms.forEach(farm => {
-                const dist = getDistanceFromLatLonInKm(lat, lng, farm.latitude, farm.longitude);
+                const dist = getDistanceFromLatLonInKm(lat, lng, farm.Latitude, farm.Longitude);
                 if (dist <= 25) nearbyCount++;
             });
 
