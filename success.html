@@ -38,7 +38,7 @@
 
             // Read the farm ID directly from the URL query parameter (e.g., success.html?id=YOUR_UUID)
             const urlParams = new URLSearchParams(window.location.search);
-            const farmId = urlParams.get('id');
+            const farmId = urlParams.get('id') || urlParams.get('client_reference_id') || urlParams.get('farm_id');
 
             if (farmId) {
                 try {
