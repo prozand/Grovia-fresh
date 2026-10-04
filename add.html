@@ -61,7 +61,9 @@
         // Supabase Credentials
         const SUPABASE_URL = 'https://xlftvjrhzklunsbaxcur.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Initialize client with a unique non-conflicting variable name
+        const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // Stripe Payment Link
         const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/test_cNi5kCa6b14Z0ip38M2B201';
@@ -95,7 +97,7 @@
                 statusDiv.innerHTML = `✅ Coordinates found. Saving to database...`;
 
                 // 2. Insert into Supabase as Inactive (Active = false) awaiting payment
-                const { data, error } = await supabase.from('farms').insert([
+                const { data, error } = await dbClient.from('farms').insert([
                     {
                         title: title,
                         Address: address,
