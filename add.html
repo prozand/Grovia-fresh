@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grovia - Add Farm Stand</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background-color: #f4f4f4; 
+            margin: 0; 
+            padding: 20px; 
+        }
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+        }
+        h2 { color: #2c5e3b; margin-top: 0; }
+        label { display: block; margin-top: 15px; font-weight: bold; color: #333; }
+        input, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        button { background: #2c5e3b; color: white; border: none; padding: 12px 20px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 25px; width: 100%; }
+        button:hover { background: #1a3c26; }
+        #status { margin-top: 15px; font-weight: bold; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Add New Grovia Farm Stand</h2>
+        <p>Enter the address below. The system will automatically find the GPS coordinates and save it to Supabase.</p>
+        
+        <form id="farm-form">
+            <label>Farm Stand Name</label>
+            <input type="text" id="title" placeholder="e.g., Green Valley Family Farm" required>
+
+            <label>Street Number & Name</label>
+            <input type="text" id="street" placeholder="e.g., 6098 4 Line" required>
+
+            <label>Town / City</label>
+            <input type="text" id="town" placeholder="e.g., Alliston" required>
+
+            <label>Province</label>
+            <input type="text" id="province" value="Ontario" required>
+
+            <label>Postal Code</label>
+            <input type="text" id="postal" placeholder="e.g., L9R 1V2">
+
+            <label>Products Sold (comma separated)</label>
+            <textarea id="products" placeholder="e.g., Fresh Eggs, Honey, Sourdough Bread" rows="3"></textarea>
+
+            <button type="submit" id="submit-btn">Find Coordinates & Save Stand</button>
+        </form>
+
+        <div id="status"></div>
+    </div>
+
+    <!-- Supabase Library CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase Credentials
+        const SUPABASE_URL = 'https://xlftvjrhzklunsbaxcur.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        document.getElementById('farm-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const statusDiv = document.getElementById('status');
+            const submitBtn = document.getElementById('submit-btn');
+
+            const title = document.getElementById('title').value;
+            const street = document.getElementById('street').value;
+            const town = document.getElementById('town').value;
+            const province = document.getElementById('province').value;
+            const postal = document.getElementById('postal').value;
+            const products = document.getElementById('products').value;
+
+            statusDiv.style.color = '#333';
+            statusDiv.innerHTML = "📍 Translating address to GPS coordinates...";
+            submitBtn.disabled = true;
+
+            // Build full address string for geocoding
+            const fullAddress = `${street}, ${town}, ${province}, Canada`;
+            const encodedAddress = encodeURIComponent(fullAddress);
+
+            try {
+                // Call OpenStreetMap Nominatim Geocoding API (Free)
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}`);
+                const results = await response.json();
+
+                if (!results || results.length === 0) {
+                    throw new Error("Could not find GPS coordinates for this address. Please check the street and town spelling.");
+                }
+
+                const latitude = parseFloat(results[0].lat);
+                const longitude = parseFloat(results[0].lon);
+
+                statusDiv.innerHTML = `✅ Found coordinates (${latitude.toFixed(4)}, ${longitude.toFixed(4)}). Saving to database...`;
+
+                // Insert into Supabase 'farms' table
+                const { error } = await supabase.from('farms').insert([
+                    {
+                        title: title,
+                        street_name: street,
+                        town: town,
+                        province: province,
+                        postal_code: postal,
+                        products: products,
+                        latitude: latitude,
+                        longitude: longitude,
+                        active: true
+                    }
+                ]);
+
+                if (error) throw error;
+
+                statusDiv.style.color = 'green';
+                statusDiv.innerHTML = "🎉 Success! Farm stand added and mapped successfully!";
+                document.getElementById('farm-form').reset();
+
+            } catch (err) {
+                console.error(err);
+                statusDiv.style.color = 'red';
+                statusDiv.innerHTML = "❌ Error: " + err.message;
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
