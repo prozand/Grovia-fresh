@@ -20,16 +20,62 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
             border-top: 6px solid #2c5e3b;
         }
-        h2 { color: #2c5e3b; margin-top: 0; }
-        p { color: #555; line-height: 1.5; }
-        label { display: block; margin-top: 15px; font-weight: bold; color: #333; }
-        input, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        button { background: #2c5e3b; color: white; border: none; padding: 14px 20px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 25px; width: 100%; }
-        button:hover { background: #1a3c26; }
-        button:disabled { background: #999; cursor: not-allowed; }
-        #status { margin-top: 15px; font-weight: bold; text-align: center; }
-        .back-link { display: inline-block; margin-bottom: 20px; color: #2c5e3b; text-decoration: none; font-weight: bold; }
-        .back-link:hover { text-decoration: underline; }
+        h2 { 
+            color: #2c5e3b; 
+            margin-top: 0; 
+        }
+        p { 
+            color: #555; 
+            line-height: 1.5; 
+        }
+        label { 
+            display: block; 
+            margin-top: 15px; 
+            font-weight: bold; 
+            color: #333; 
+        }
+        input, textarea { 
+            width: 100%; 
+            padding: 10px; 
+            margin-top: 5px; 
+            border: 1px solid #ccc; 
+            border-radius: 6px; 
+            box-sizing: border-box; 
+        }
+        button { 
+            background: #2c5e3b; 
+            color: white; 
+            border: none; 
+            padding: 14px 20px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            margin-top: 25px; 
+            width: 100%; 
+        }
+        button:hover { 
+            background: #1a3c26; 
+        }
+        button:disabled { 
+            background: #999; 
+            cursor: not-allowed; 
+        }
+        #status { 
+            margin-top: 15px; 
+            font-weight: bold; 
+            text-align: center; 
+        }
+        .back-link { 
+            display: inline-block; 
+            margin-bottom: 20px; 
+            color: #2c5e3b; 
+            text-decoration: none; 
+            font-weight: bold; 
+        }
+        .back-link:hover { 
+            text-decoration: underline; 
+        }
     </style>
 </head>
 <body>
@@ -62,10 +108,10 @@
         const SUPABASE_URL = 'https://xlftvjrhzklunsbaxcur.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
         
-        // Initialize client with a unique non-conflicting variable name
+        // Initialize Supabase client
         const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Stripe Payment Link
+        // Stripe Test Payment Link
         const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/test_cNi5kCa6b14Z0ip38M2B201';
 
         document.getElementById('farm-form').addEventListener('submit', async function(e) {
@@ -83,8 +129,7 @@
 
             try {
                 // 1. Geocode address via OpenStreetMap Nominatim
-                const encodedAddress = encodeURIComponent(address + ", Canada");
-                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}`);
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address + ", Canada")}`);
                 const results = await response.json();
 
                 if (!results || results.length === 0) {
@@ -96,7 +141,7 @@
 
                 statusDiv.innerHTML = `✅ Coordinates found. Saving to database...`;
 
-                // 2. Insert into Supabase as Inactive (Active = false) awaiting payment
+                // 2. Insert into Supabase as Inactive (Active = false) awaiting payment verification
                 const { data, error } = await dbClient.from('farms').insert([
                     {
                         title: title,
@@ -110,15 +155,16 @@
 
                 if (error) throw error;
 
-                if (data && data.length > 0) {
-                    localStorage.setItem('pending_farm_id', data[0].id);
-                }
+                const farmId = data[0].id;
+                localStorage.setItem('pending_farm_id', farmId);
 
                 statusDiv.innerHTML = `🚀 Redirecting to Stripe checkout...`;
 
-                // 3. Redirect to Stripe Checkout Paywall
+                // 3. Append the farm ID dynamically as Stripe's client_reference_id and redirect
+                const dynamicStripeUrl = `${STRIPE_PAYMENT_LINK}?client_reference_id=${farmId}`;
+
                 setTimeout(() => {
-                    window.location.href = STRIPE_PAYMENT_LINK;
+                    window.location.href = dynamicStripeUrl;
                 }, 800);
 
             } catch (err) {
