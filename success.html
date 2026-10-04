@@ -4,53 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grovia - Listing Successful!</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            background-color: #f9f6f0; 
-            margin: 0; 
-            padding: 20px; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .container { 
-            max-width: 500px; 
-            background: white; 
-            padding: 40px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-            border-top: 6px solid #2e7d32;
-            text-align: center;
-        }
-        h2 { 
-            color: #2c5e3b; 
-            margin-top: 0; 
-        }
-        p { 
-            color: #555; 
-            line-height: 1.6; 
-        }
-        .btn { 
-            display: inline-block; 
-            background: #2c5e3b; 
-            color: white; 
-            text-decoration: none; 
-            padding: 14px 24px; 
-            font-size: 16px; 
-            font-weight: bold; 
-            border-radius: 6px; 
-            margin-top: 25px; 
-        }
-        .btn:hover { 
-            background: #1a3c26; 
-        }
-        #status-msg { 
-            font-weight: bold; 
-            color: #2e7d32; 
-            margin: 15px 0; 
-        }
+        body { font-family: Arial, sans-serif; background-color: #f9f6f0; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .container { max-width: 500px; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 6px solid #2e7d32; text-align: center; }
+        h2 { color: #2c5e3b; margin-top: 0; }
+        p { color: #555; line-height: 1.6; }
+        .btn { display: inline-block; background: #2c5e3b; color: white; text-decoration: none; padding: 14px 24px; font-size: 16px; font-weight: bold; border-radius: 6px; margin-top: 25px; }
+        .btn:hover { background: #1a3c26; }
+        #status-msg { font-weight: bold; color: #2e7d32; margin: 15px 0; }
     </style>
 </head>
 <body>
@@ -64,33 +26,27 @@
         <a href="index.html" class="btn" id="map-btn" style="display: none;">View Live Map</a>
     </div>
 
-    <!-- Supabase Library CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Supabase Credentials
         const SUPABASE_URL = 'https://xlftvjrhzklunsbaxcur.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
-        
-        // Initialize Supabase client
         const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         window.addEventListener('DOMContentLoaded', async () => {
             const statusMsg = document.getElementById('status-msg');
             const mapBtn = document.getElementById('map-btn');
 
-            const pendingId = localStorage.getItem('pending_farm_id');
+            // Read the farm ID directly from the URL query parameter (e.g., success.html?id=YOUR_UUID)
+            const urlParams = new URLSearchParams(window.location.search);
+            const farmId = urlParams.get('id');
 
-            if (pendingId) {
+            if (farmId) {
                 try {
-                    // Update the specific row in Supabase to active = true
                     const { error } = await dbClient.from('farms')
                         .update({ Active: true })
-                        .eq('id', pendingId);
+                        .eq('id', farmId);
 
                     if (error) throw error;
-
-                    // Clean up local storage
-                    localStorage.removeItem('pending_farm_id');
 
                     statusMsg.innerHTML = "✅ Your stand is officially live on the map!";
                     mapBtn.style.display = 'inline-block';
@@ -101,7 +57,8 @@
                     mapBtn.style.display = 'inline-block';
                 }
             } else {
-                statusMsg.innerHTML = "✅ Your listing is active!";
+                statusMsg.style.color = 'red';
+                statusMsg.innerHTML = "⚠️ No listing ID found in URL parameters.";
                 mapBtn.style.display = 'inline-block';
             }
         });
