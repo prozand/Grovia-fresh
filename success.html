@@ -24,8 +24,14 @@
             border-top: 6px solid #2e7d32;
             text-align: center;
         }
-        h2 { color: #2c5e3b; margin-top: 0; }
-        p { color: #555; line-height: 1.6; }
+        h2 { 
+            color: #2c5e3b; 
+            margin-top: 0; 
+        }
+        p { 
+            color: #555; 
+            line-height: 1.6; 
+        }
         .btn { 
             display: inline-block; 
             background: #2c5e3b; 
@@ -37,15 +43,21 @@
             border-radius: 6px; 
             margin-top: 25px; 
         }
-        .btn:hover { background: #1a3c26; }
-        #status-msg { font-weight: bold; color: #2e7d32; margin: 15px 0; }
+        .btn:hover { 
+            background: #1a3c26; 
+        }
+        #status-msg { 
+            font-weight: bold; 
+            color: #2e7d32; 
+            margin: 15px 0; 
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h2>🎉 Payment Successful!</h2>
-        <p>Thank you for listing your farm stand on Grovia. Your payment has been verified and your directory listing is now active.</p>
+        <p>Thank you for listing your farm stand on Grovia. Your payment has been verified and your directory listing is now being activated.</p>
         
         <div id="status-msg">Activating your farm stand...</div>
 
@@ -55,6 +67,13 @@
     <!-- Supabase Library CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        // Supabase Credentials
+        const SUPABASE_URL = 'https://xlftvjrhzklunsbaxcur.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
+        
+        // Initialize Supabase client
+        const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         window.addEventListener('DOMContentLoaded', async () => {
             const statusMsg = document.getElementById('status-msg');
             const mapBtn = document.getElementById('map-btn');
@@ -62,25 +81,21 @@
             const pendingId = localStorage.getItem('pending_farm_id');
 
             if (pendingId) {
-                const SUPABASE_URL = 'https://xlftvjrhzklunsbaxcur.supabase.co';
-                const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
-                const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
                 try {
-                    // Activate the farm in Supabase and add a verification token
-                    const { error } = await supabase.from('farms')
-                        .update({ Active: true, stripe_token: 'tok_verified_' + Date.now() })
+                    // Update the specific row in Supabase to active = true
+                    const { error } = await dbClient.from('farms')
+                        .update({ Active: true })
                         .eq('id', pendingId);
 
                     if (error) throw error;
 
-                    // Clean up storage
+                    // Clean up local storage
                     localStorage.removeItem('pending_farm_id');
 
                     statusMsg.innerHTML = "✅ Your stand is officially live on the map!";
                     mapBtn.style.display = 'inline-block';
                 } catch (err) {
-                    console.error("Activation error:", err);
+                    console.error("Activation error details:", err);
                     statusMsg.style.color = 'red';
                     statusMsg.innerHTML = "⚠️ Payment received, but automatic activation failed. Please contact support.";
                     mapBtn.style.display = 'inline-block';
