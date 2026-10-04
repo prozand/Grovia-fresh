@@ -1,1 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grovia - Listing Successful!</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background-color: #f9f6f0; 
+            margin: 0; 
+            padding: 20px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container { 
+            max-width: 500px; 
+            background: white; 
+            padding: 40px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            border-top: 6px solid #2e7d32;
+            text-align: center;
+        }
+        h2 { color: #2c5e3b; margin-top: 0; }
+        p { color: #555; line-height: 1.6; }
+        .btn { 
+            display: inline-block; 
+            background: #2c5e3b; 
+            color: white; 
+            text-decoration: none; 
+            padding: 14px 24px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            border-radius: 6px; 
+            margin-top: 25px; 
+        }
+        .btn:hover { background: #1a3c26; }
+        #status-msg { font-weight: bold; color: #2e7d32; margin: 15px 0; }
+    </style>
+</head>
+<body>
 
+    <div class="container">
+        <h2>🎉 Payment Successful!</h2>
+        <p>Thank you for listing your farm stand on Grovia. Your payment has been verified and your directory listing is now active.</p>
+        
+        <div id="status-msg">Activating your farm stand...</div>
+
+        <a href="index.html" class="btn" id="map-btn" style="display: none;">View Live Map</a>
+    </div>
+
+    <!-- Supabase Library CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', async () => {
+            const statusMsg = document.getElementById('status-msg');
+            const mapBtn = document.getElementById('map-btn');
+
+            const pendingId = localStorage.getItem('pending_farm_id');
+
+            if (pendingId) {
+                const SUPABASE_URL = 'https://xlftvjrhzklunsbaxcur.supabase.co';
+                const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
+                const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+                try {
+                    // Activate the farm in Supabase and add a verification token
+                    const { error } = await supabase.from('farms')
+                        .update({ Active: true, stripe_token: 'tok_verified_' + Date.now() })
+                        .eq('id', pendingId);
+
+                    if (error) throw error;
+
+                    // Clean up storage
+                    localStorage.removeItem('pending_farm_id');
+
+                    statusMsg.innerHTML = "✅ Your stand is officially live on the map!";
+                    mapBtn.style.display = 'inline-block';
+                } catch (err) {
+                    console.error("Activation error:", err);
+                    statusMsg.style.color = 'red';
+                    statusMsg.innerHTML = "⚠️ Payment received, but automatic activation failed. Please contact support.";
+                    mapBtn.style.display = 'inline-block';
+                }
+            } else {
+                statusMsg.innerHTML = "✅ Your listing is active!";
+                mapBtn.style.display = 'inline-block';
+            }
+        });
+    </script>
+</body>
+</html>
