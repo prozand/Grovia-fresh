@@ -62,10 +62,8 @@ class GroviaMapElement extends HTMLElement {
 
         setTimeout(() => { map.invalidateSize(); }, 250);
 
-        // --- SUPABASE CONNECTION ---
         const SUPABASE_URL = 'https://xlftvjrhzklunsbaxcur.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
-        
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         badge.innerHTML = `📍 Loading Grovia stands...`;
@@ -102,6 +100,13 @@ class GroviaMapElement extends HTMLElement {
             const fullAddress = `${streetNum} ${streetName}, ${town}, ${province} ${postalCode}`.trim();
             const verifiedBadge = farm.stripe_token ? '<br><small style="color: #2e7d32; font-weight: bold;">✔ Verified Paid Stand</small>' : '';
 
+            // HOVER TOOLTIP: Quick preview on mouseover
+            marker.bindTooltip(`<b>${farm.title || 'Grovia Stand'}</b><br><em>Click for details</em>`, {
+                direction: 'top',
+                offset: [0, -15]
+            });
+
+            // CLICK POPUP: Detailed view
             marker.bindPopup(`
                 <div style="font-size: 14px; line-height: 1.4; padding: 4px; min-width: 180px;">
                     <strong style="color: #2c5e3b; font-size: 15px;">${farm.title || 'Grovia Stand'}</strong><br>
@@ -112,7 +117,6 @@ class GroviaMapElement extends HTMLElement {
             `);
         });
 
-        // --- NATIVE GPS LOCATION ---
         let userMarker = null;
         let radiusCircle = null;
 
@@ -125,7 +129,7 @@ class GroviaMapElement extends HTMLElement {
         }
 
         const updatePositionOnMap = (lat, lng, label) => {
-            map.setView([lat, lng], 13);
+            map.setView([lat, lng], 11);
 
             if (userMarker) map.removeLayer(userMarker);
             if (radiusCircle) map.removeLayer(radiusCircle);
