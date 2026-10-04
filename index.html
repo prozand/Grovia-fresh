@@ -3,53 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grovia - Local Farm Stands</title>
+    <title>Grovia - Southern Ontario Farm Directory</title>
+    <!-- Favicon Fix -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body, html {
+        body {
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            font-family: Arial, sans-serif;
+            background-color: #f9f6f0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
         }
         header {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background: #2c5e3b;
+            background-color: #2c5e3b;
             color: white;
+            padding: 15px 25px;
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            padding: 0 20px;
-            z-index: 1001;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        header h1 {
+        h1 {
             margin: 0;
-            font-size: 20px;
-            letter-spacing: 0.5px;
+            font-size: 24px;
         }
-        .add-btn {
-            background: #d4af37;
-            color: #1a3c26;
-            padding: 8px 16px;
-            border-radius: 6px;
+        .btn {
+            background-color: #e65100;
+            color: white;
             text-decoration: none;
+            padding: 10px 18px;
             font-weight: bold;
+            border-radius: 6px;
             font-size: 14px;
         }
-        .add-btn:hover {
-            background: #e6c555;
+        .btn:hover {
+            background-color: #bf360c;
         }
-        /* Push map down below the header */
-        map-element {
-            display: block;
-            margin-top: 60px;
-            height: calc(100vh - 60px);
+        #map {
+            flex-grow: 1;
+            width: 100%;
+        }
+        .leaflet-popup-content h3 {
+            color: #2c5e3b;
+            margin: 0 0 5px 0;
+        }
+        .leaflet-popup-content p {
+            margin: 4px 0;
+            color: #555;
         }
     </style>
 </head>
@@ -57,44 +61,70 @@
 
     <header>
         <h1>🌱 Grovia Farm Directory</h1>
-        <a href="add.html" class="add-btn">+ List Your Stand</a>
+        <a href="add.html" class="btn">+ List Your Stand ($25)</a>
     </header>
 
-    <!-- Your Map Custom Element -->
-    <map-element></map-element>
+    <div id="map"></div>
 
-    <!-- Include your map component script -->
-    <script src="map-element.js"></script>
-
-    <!-- Supabase CDN for payment return check -->
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        window.addEventListener('DOMContentLoaded', async () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('success') === 'true') {
-                const pendingId = localStorage.getItem('pending_farm_id');
-                if (pendingId) {
-                    const SUPABASE_URL = 'https://xlftvjrhzklunsbaxcur.supabase.co';
-                    const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
-                    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Initialize Map centered in Southern Ontario
+        const map = L.map('map').setView([44.05, -79.85], 10);
 
-                    // Activate the farm in Supabase and add a verification token
-                    await supabase.from('farms')
-                        .update({ Active: true, stripe_token: 'tok_verified_' + Date.now() })
-                        .eq('id', pendingId);
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
 
-                    localStorage.removeItem('pending_farm_id');
+        // Supabase Credentials
+        const SUPABASE_URL = 'https://xlftvjrhzklunsbaxcur.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
+        const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-                    // Show success banner
-                    const banner = document.createElement('div');
-                    banner.style.cssText = "position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; background: #2e7d32; color: white; padding: 12px 24px; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3);";
-                    banner.innerHTML = "🎉 Payment Successful! Your farm stand is now live and verified on Grovia!";
-                    document.body.appendChild(banner);
-                    setTimeout(() => banner.remove(), 6000);
+        // Escape helper for safe text rendering in popups
+        function safeText(str) {
+            return String(str || '').replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        async function loadActiveFarms() {
+            try {
+                // Fetch only verified, active farm stands from Supabase
+                const { data: farms, error } = await dbClient
+                    .from('farms')
+                    .select('*')
+                    .eq('Active', true);
+
+                if (error) throw error;
+
+                if (farms) {
+                    farms.forEach(farm => {
+                        if (farm.Latitude && farm.Longitude) {
+                            const popupContent = `
+                                <div>
+                                    <h3>${safeText(farm.title)}</h3>
+                                    <p><strong>Address:</strong> ${safeText(farm.Address)}</p>
+                                    <p><strong>Products:</strong> ${safeText(farm.Products)}</p>
+                                </div>
+                            `;
+                            L.marker([farm.Latitude, farm.Longitude])
+                             .addTo(map)
+                             .bindPopup(popupContent);
+                        }
+                    });
                 }
+            } catch (err) {
+                console.error("Error loading active farms:", err);
             }
-        });
-    </script>
+        }
 
+        // Load markers on page load
+        loadActiveFarms();
+    </script>
 </body>
 </html>
