@@ -31,6 +31,11 @@
             margin: 0;
             font-size: 24px;
         }
+        .header-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
         .btn {
             background-color: #e65100;
             color: white;
@@ -39,9 +44,17 @@
             font-weight: bold;
             border-radius: 6px;
             font-size: 14px;
+            border: none;
+            cursor: pointer;
         }
         .btn:hover {
             background-color: #bf360c;
+        }
+        .btn-secondary {
+            background-color: #1976d2;
+        }
+        .btn-secondary:hover {
+            background-color: #115293;
         }
         #map {
             flex-grow: 1;
@@ -61,7 +74,10 @@
 
     <header>
         <h1>🌱 Grovia Farm Directory</h1>
-        <a href="add.html" class="btn">+ List Your Stand ($25)</a>
+        <div class="header-controls">
+            <button class="btn btn-secondary" id="locate-btn" title="Center map on your location">📍 My Location</button>
+            <a href="add.html" class="btn">+ List Your Stand ($25)</a>
+        </div>
     </header>
 
     <div id="map"></div>
@@ -71,7 +87,7 @@
     <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Initialize Map centered in Southern Ontario
+        // Initialize Map centered on Southern Ontario as fallback
         const map = L.map('map').setView([44.05, -79.85], 10);
 
         // Add OpenStreetMap tiles
@@ -92,9 +108,9 @@
             );
         }
 
+        // Load active farm markers from Supabase
         async function loadActiveFarms() {
             try {
-                // Fetch only verified, active farm stands from Supabase
                 const { data: farms, error } = await dbClient
                     .from('farms')
                     .select('*')
@@ -123,8 +139,44 @@
             }
         }
 
-        // Load markers on page load
+        // Request user geolocation on load and zoom to ~25km radius (Zoom level 11)
+        function initUserLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const userLat = position.coords.latitude;
+                        const userLng = position.coords.longitude;
+                        
+                        // Set map view to user location at zoom level 11 (~25km radius scope)
+                        map.setView([userLat, userLng], 11);
+
+                        // Add a subtle blue marker for the user's location
+                        L.circleMarker([userLat, userLng], {
+                            radius: 8,
+                            fillColor: '#1976d2',
+                            color: '#fff',
+                            weight: 2,
+                            opacity: 1,
+                            fillOpacity: 0.9
+                        }).addTo(map).bindPopup("<b>You are here</b>");
+                    },
+                    (error) => {
+                        console.warn("Geolocation permission denied or unavailable:", error.message);
+                        // Keeps default Southern Ontario center if user blocks or denies location
+                    },
+                    { timeout: 10000, maximumAge: 60000 }
+                );
+            }
+        }
+
+        // Hook up the manual "My Location" button in the header
+        document.getElementById('locate-btn').addEventListener('click', () => {
+            initUserLocation();
+        });
+
+        // Run startup routines
         loadActiveFarms();
+        initUserLocation();
     </script>
 </body>
 </html>
