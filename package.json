@@ -1,0 +1,25 @@
+{
+  "name": "repo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "map-element.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://x-access-token:ghs_13473_eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRobmQiLCJjdHgiOiJRc0lxQy05c3FIdzVFcDlJXzZBc0NkeDlQUkR3WEtDemk2T001XzB1cDJOdkxmVEdLb041bzZDNG9RIiwiZXhwIjoxNzkxMjQwMjAxLCJpYXQiOjE3OTEyMzY2MDEsImlzcyI6ImdpdGh1YiIsImp0aSI6IjgyZGY3MzIyLTQ3ZGMtNDBlYS1hN2YyLTQ5Yjc4OWU5YTM1MiIsInZlciI6M30.jJN6VTMwnnSUVoH9HAJt3KdH7IWgm46hUu7_IRTWB7TTqgvJMlrLTYBl_Xz8DrwuTvyxNus_G2HaNccnZP1h1w@github.com/prozand/Grovia-fresh.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/prozand/Grovia-fresh/issues"
+  },
+  "homepage": "https://github.com/prozand/Grovia-fresh#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
+    "stripe": "^23.0.0"
+  }
+}
