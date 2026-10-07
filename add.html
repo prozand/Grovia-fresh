@@ -93,8 +93,7 @@
                 const farmId = data[0].id;
                 statusDiv.innerHTML = `🚀 Redirecting to Stripe checkout...`;
 
-                // Append the farm ID directly into the Stripe redirect success URL parameters
-                // Make sure your Stripe Dashboard redirect URL ends with success.html?farm_id=
+                // Pass the farm ID as the client_reference_id for the Stripe webhook
                 const finalStripeUrl = `${STRIPE_PAYMENT_LINK}?client_reference_id=${farmId}`;
 
                 setTimeout(() => {

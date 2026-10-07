@@ -21,46 +21,19 @@
         <h2>🎉 Payment Successful!</h2>
         <p>Thank you for listing your farm stand on Grovia. Your payment has been verified and your directory listing is now being activated.</p>
         
-        <div id="status-msg">Activating your farm stand...</div>
+        <div id="status-msg">✅ Your payment was received! Your stand will appear on the map shortly once our system processes the transaction.</div>
 
         <a href="index.html" class="btn" id="map-btn" style="display: none;">View Live Map</a>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const SUPABASE_URL = 'https://xlftvjrhzklunsbaxcur.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
-        const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        window.addEventListener('DOMContentLoaded', async () => {
-            const statusMsg = document.getElementById('status-msg');
+        window.addEventListener('DOMContentLoaded', () => {
             const mapBtn = document.getElementById('map-btn');
-
-            // Read the farm ID directly from the URL query parameter (e.g., success.html?id=YOUR_UUID)
-            const urlParams = new URLSearchParams(window.location.search);
-            const farmId = urlParams.get('id');
-
-            if (farmId) {
-                try {
-                    const { error } = await dbClient.from('farms')
-                        .update({ Active: true })
-                        .eq('id', farmId);
-
-                    if (error) throw error;
-
-                    statusMsg.innerHTML = "✅ Your stand is officially live on the map!";
-                    mapBtn.style.display = 'inline-block';
-                } catch (err) {
-                    console.error("Activation error details:", err);
-                    statusMsg.style.color = 'red';
-                    statusMsg.innerHTML = "⚠️ Payment received, but automatic activation failed. Please contact support.";
-                    mapBtn.style.display = 'inline-block';
-                }
-            } else {
-                statusMsg.style.color = 'red';
-                statusMsg.innerHTML = "⚠️ No listing ID found in URL parameters.";
+            
+            // Show the map button after a brief delay to simulate processing
+            setTimeout(() => {
                 mapBtn.style.display = 'inline-block';
-            }
+            }, 1000);
         });
     </script>
 </body>
