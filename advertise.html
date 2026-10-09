@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grovia - Advertise on Our Map</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f9f6f0; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 40px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 6px solid #2c5e3b; }
+        h2 { color: #2c5e3b; margin-top: 0; }
+        p { color: #555; line-height: 1.5; }
+        label { display: block; margin-top: 15px; font-weight: bold; color: #333; }
+        input[type="text"], input[type="email"], input[type="tel"], textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        button { background: #2c5e3b; color: white; border: none; padding: 14px 20px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 25px; width: 100%; }
+        button:hover { background: #1a3c26; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: #2c5e3b; text-decoration: none; font-weight: bold; }
+        .back-link:hover { text-decoration: underline; }
+        .success-msg { display: none; background: #e8f5e9; color: #2c5e3b; padding: 15px; border-radius: 6px; margin-top: 20px; font-weight: bold; text-align: center; border: 1px solid #a3e635; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Map</a>
+        <h2>Advertise Your Business on Grovia</h2>
+        <p>Put your farm, local business, or service directly in front of buyers browsing farm stands across Southern Ontario. Fill out the details below, and our team will get back to you shortly.</p>
+        
+        <!-- Netlify Form Handling enabled automatically via netlify attribute -->
+        <form name="advertiser-inquiry" method="POST" data-netlify="true" id="ad-form">
+            <input type="hidden" name="form-name" value="advertiser-inquiry">
+
+            <label>Business / Farm Name</label>
+            <input type="text" name="business_name" placeholder="e.g., Country Feeds & Supplies" required>
+
+            <label>Contact Person</label>
+            <input type="text" name="contact_name" placeholder="e.g., John Smith" required>
+
+            <label>Email Address</label>
+            <input type="email" name="email" placeholder="e.g., john@countryfeeds.ca" required>
+
+            <label>Phone Number</label>
+            <input type="tel" name="phone" placeholder="e.g., (705) 555-0199">
+
+            <label>Tell us about your advertising goals / preferred placement</label>
+            <textarea name="message" rows="4" placeholder="e.g., Interested in sidebar ad space for the upcoming season..." required></textarea>
+
+            <button type="submit" id="submit-btn">Send Inquiry to Admin</button>
+        </form>
+
+        <div id="success-box" class="success-msg">
+            ✅ Thank you! Your inquiry has been sent successfully to hello@grovia.ca. We will be in touch soon!
+        </div>
+    </div>
+
+    <script>
+        // Optional smooth client-side confirmation feedback for Netlify forms
+        document.getElementById('ad-form').addEventListener('submit', function(e) {
+            // Let Netlify handle the POST naturally, or show confirmation message
+            document.getElementById('submit-btn').disabled = true;
+            document.getElementById('submit-btn').textContent = "Sending...";
+        });
+    </script>
+</body>
+</html>
