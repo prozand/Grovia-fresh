@@ -32,10 +32,17 @@ exports.handler = async (event) => {
       const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
       const supabase = createClient(supabaseUrl, supabaseKey);
 
-      // 5. Tell Supabase to change Active to true
+      // 5. Calculate the date exactly 365 days from right now
+      const expirationDate = new Date();
+      expirationDate.setDate(expirationDate.getDate() + 365);
+
+      // 6. Tell Supabase to change Active to true AND save the expiration date
       const { error } = await supabase
         .from('farms')
-        .update({ Active: true })
+        .update({ 
+          Active: true,
+          expires_at: expirationDate.toISOString()
+        })
         .eq('id', farmId);
 
       if (error) {
@@ -49,6 +56,6 @@ exports.handler = async (event) => {
     }
   }
 
-  // 6. Return a real 200 OK to Stripe
+  // 7. Return a real 200 OK to Stripe
   return { statusCode: 200, body: JSON.stringify({ received: true }) };
 };
