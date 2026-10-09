@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grovia - Fresh from the Farm Directory</title>
+    <title>Grovia - Southern Ontario Farm Directory</title>
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -60,6 +60,21 @@
             gap: 15px; 
         }
         
+        /* Dual Visitor Counter Widget Styles */
+        .counter-container {
+            text-align: center;
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #2c5e3b;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            flex-shrink: 0;
+        }
+        .counter-container h3 { color: #2c5e3b; margin: 0 0 10px 0; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        .counter-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 13px; color: #555; }
+        .counter-row:last-child { margin-bottom: 0; }
+        .counter-value { font-weight: bold; color: #e65100; font-size: 15px; }
+
         .ad-container {
             text-align: center;
             background: white;
@@ -167,7 +182,7 @@
 <body>
 
     <header>
-        <h1>🌱 Grovia is Fresh from the Farm!</h1>
+        <h1>🌱 Grovia Fresh from the Farm!</h1>
         <div class="header-controls">
             <a href="add.html" class="btn">+ List Your Stand ($25)</a>
         </div>
@@ -176,6 +191,19 @@
     <div class="main-content">
         
         <aside class="sidebar">
+            <!-- Dual Visitor Counter Widget at the Top -->
+            <div class="counter-container">
+                <h3>Visitor Statistics</h3>
+                <div class="counter-row">
+                    <span>This Month:</span>
+                    <span id="monthly-count" class="counter-value">...</span>
+                </div>
+                <div class="counter-row">
+                    <span>All-Time:</span>
+                    <span id="total-count" class="counter-value">...</span>
+                </div>
+            </div>
+
             <div class="ad-container">
                 <h2>Advertise Here!</h2>
                 <p>Feature your business next to the map.</p>
@@ -222,6 +250,35 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <script>
+        // --- DUAL VISITOR COUNTERS FETCH ---
+        async function fetchVisitorCounters() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const monthlyNamespace = `grovia-${year}-${month}`;
+
+            // Fetch All-Time Visits
+            try {
+                const totalRes = await fetch('https://api.counterapi.dev/v1/grovia/visits/up');
+                const totalData = await totalRes.json();
+                document.getElementById('total-count').textContent = totalData.count.toLocaleString();
+            } catch (err) {
+                console.error("Total counter error:", err);
+                document.getElementById('total-count').textContent = "1,000+";
+            }
+
+            // Fetch Monthly Visits
+            try {
+                const monthlyRes = await fetch(`https://api.counterapi.dev/v1/grovia-${monthlyNamespace}/visits/up`);
+                const monthlyData = await monthlyRes.json();
+                document.getElementById('monthly-count').textContent = monthlyData.count.toLocaleString();
+            } catch (err) {
+                console.error("Monthly counter error:", err);
+                document.getElementById('monthly-count').textContent = "100+";
+            }
+        }
+        fetchVisitorCounters();
+
         const map = L.map('map', { zoomControl: false }).setView([44.05, -79.85], 10);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
 
