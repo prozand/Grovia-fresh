@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grovia - List Your Farm Stand</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <style>
         body { font-family: Arial, sans-serif; background-color: #f9f6f0; margin: 0; padding: 20px; }
         .container { max-width: 600px; margin: 40px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 6px solid #2c5e3b; }
@@ -15,11 +13,11 @@
         label { display: block; margin-top: 15px; font-weight: bold; color: #333; }
         input[type="text"] { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
         
+        /* Enhanced Product List Styles */
         .product-list { margin-top: 10px; background: #f4f7f6; padding: 15px; border-radius: 6px; border: 1px solid #e0e0e0; display: flex; flex-direction: column; gap: 8px; }
         .product-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #e0e0e0; }
         .product-row:last-child { border-bottom: none; }
-        .product-name { font-size: 16px; font-weight: bold; color: #2c5e3b; width: 40%; display: flex; align-items: center; gap: 8px; }
-        .product-name i { width: 20px; text-align: center; } /* Aligns the icons perfectly */
+        .product-name { font-size: 16px; font-weight: bold; color: #2c5e3b; width: 40%; }
         .checkbox-group { display: flex; gap: 20px; width: 60%; justify-content: flex-end; }
         
         .cb-label { display: flex; align-items: center; gap: 6px; font-weight: normal; margin-top: 0; cursor: pointer; font-size: 14px; }
@@ -52,60 +50,84 @@
             <p style="font-size: 13px; margin-top: 0; margin-bottom: 10px;">Check <strong>Sell</strong> for everything you offer. Check exactly one <strong>Primary</strong> product to serve as your map icon.</p>
             
             <div class="product-list">
+                <!-- Eggs -->
                 <div class="product-row">
-                    <div class="product-name"><i class="fa-solid fa-egg"></i> Eggs</div>
+                    <div class="product-name">🥚 Eggs</div>
                     <div class="checkbox-group">
                         <label class="cb-label"><input type="checkbox" name="product" value="Eggs" class="sell-cb"> Sell</label>
                         <label class="cb-label primary-label"><input type="checkbox" name="primary" value="Eggs" class="primary-cb"> Primary</label>
                     </div>
                 </div>
+                <!-- Honey -->
                 <div class="product-row">
-                    <div class="product-name"><i class="fa-solid fa-jar"></i> Honey</div>
+                    <div class="product-name">🐝 Honey</div>
                     <div class="checkbox-group">
                         <label class="cb-label"><input type="checkbox" name="product" value="Honey" class="sell-cb"> Sell</label>
                         <label class="cb-label primary-label"><input type="checkbox" name="primary" value="Honey" class="primary-cb"> Primary</label>
                     </div>
                 </div>
+                <!-- Maple Syrup -->
                 <div class="product-row">
-                    <div class="product-name"><i class="fa-brands fa-canadian-maple-leaf"></i> Maple Syrup</div>
+                    <div class="product-name">🍁 Maple Syrup</div>
                     <div class="checkbox-group">
                         <label class="cb-label"><input type="checkbox" name="product" value="Maple Syrup" class="sell-cb"> Sell</label>
                         <label class="cb-label primary-label"><input type="checkbox" name="primary" value="Maple Syrup" class="primary-cb"> Primary</label>
                     </div>
                 </div>
+                <!-- Firewood -->
                 <div class="product-row">
-                    <div class="product-name"><i class="fa-solid fa-fire"></i> Firewood</div>
+                    <div class="product-name">🔥 Firewood</div>
                     <div class="checkbox-group">
                         <label class="cb-label"><input type="checkbox" name="product" value="Firewood" class="sell-cb"> Sell</label>
                         <label class="cb-label primary-label"><input type="checkbox" name="primary" value="Firewood" class="primary-cb"> Primary</label>
                     </div>
                 </div>
+                <!-- Fresh Flowers -->
                 <div class="product-row">
-                    <div class="product-name"><i class="fa-solid fa-seedling"></i> Flowers</div>
+                    <div class="product-name">💐 Flowers</div>
                     <div class="checkbox-group">
                         <label class="cb-label"><input type="checkbox" name="product" value="Fresh Flowers" class="sell-cb"> Sell</label>
                         <label class="cb-label primary-label"><input type="checkbox" name="primary" value="Fresh Flowers" class="primary-cb"> Primary</label>
                     </div>
                 </div>
+                <!-- Veggies -->
                 <div class="product-row">
-                    <div class="product-name"><i class="fa-solid fa-carrot"></i> Veggies</div>
+                    <div class="product-name">🥕 Veggies</div>
                     <div class="checkbox-group">
                         <label class="cb-label"><input type="checkbox" name="product" value="Veggies" class="sell-cb"> Sell</label>
                         <label class="cb-label primary-label"><input type="checkbox" name="primary" value="Veggies" class="primary-cb"> Primary</label>
                     </div>
                 </div>
+                <!-- Fruits -->
                 <div class="product-row">
-                    <div class="product-name"><i class="fa-solid fa-apple-whole"></i> Fruits</div>
+                    <div class="product-name">🍎 Fruits</div>
                     <div class="checkbox-group">
                         <label class="cb-label"><input type="checkbox" name="product" value="Fruits" class="sell-cb"> Sell</label>
                         <label class="cb-label primary-label"><input type="checkbox" name="primary" value="Fruits" class="primary-cb"> Primary</label>
                     </div>
                 </div>
+                <!-- Arts & Craft -->
                 <div class="product-row">
-                    <div class="product-name"><i class="fa-solid fa-palette"></i> Arts & Craft</div>
+                    <div class="product-name">🎨 Arts & Craft</div>
                     <div class="checkbox-group">
                         <label class="cb-label"><input type="checkbox" name="product" value="Arts & Craft" class="sell-cb"> Sell</label>
                         <label class="cb-label primary-label"><input type="checkbox" name="primary" value="Arts & Craft" class="primary-cb"> Primary</label>
+                    </div>
+                </div>
+                <!-- Beef -->
+                <div class="product-row">
+                    <div class="product-name">🥩 Beef</div>
+                    <div class="checkbox-group">
+                        <label class="cb-label"><input type="checkbox" name="product" value="Beef" class="sell-cb"> Sell</label>
+                        <label class="cb-label primary-label"><input type="checkbox" name="primary" value="Beef" class="primary-cb"> Primary</label>
+                    </div>
+                </div>
+                <!-- Chicken -->
+                <div class="product-row">
+                    <div class="product-name">🍗 Chicken</div>
+                    <div class="checkbox-group">
+                        <label class="cb-label"><input type="checkbox" name="product" value="Chicken" class="sell-cb"> Sell</label>
+                        <label class="cb-label primary-label"><input type="checkbox" name="primary" value="Chicken" class="primary-cb"> Primary</label>
                     </div>
                 </div>
             </div>
@@ -126,8 +148,10 @@
         document.querySelectorAll('.primary-cb').forEach(primaryCb => {
             primaryCb.addEventListener('change', function() {
                 const allPrimary = document.querySelectorAll('.primary-cb');
+                
                 if (this.checked) {
                     this.closest('.product-row').querySelector('.sell-cb').checked = true;
+                    
                     allPrimary.forEach(cb => {
                         if (cb !== this) {
                             cb.disabled = true;
