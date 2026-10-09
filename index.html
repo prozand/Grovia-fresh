@@ -52,6 +52,9 @@
             background-color: #e65100; color: white; text-decoration: none;
             padding: 9px 16px; font-weight: bold; border-radius: 6px;
             font-size: 14px; border: none; cursor: pointer;
+            text-align: center;
+            box-sizing: border-box;
+            display: inline-block;
         }
         .btn:hover { background-color: #bf360c; }
         .btn-secondary { background-color: #1976d2; }
@@ -75,6 +78,15 @@
             flex-direction: column;
             overflow-y: auto; 
             gap: 15px; 
+        }
+
+        .sidebar-list-btn {
+            width: 100%;
+            font-size: 13px;
+            padding: 12px 10px;
+            background-color: #e65100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            flex-shrink: 0;
         }
 
         .ad-container {
@@ -174,7 +186,7 @@
         @media (max-width: 768px) {
             header { flex-direction: column; gap: 10px; padding: 12px; text-align: center; }
             h1 { font-size: 18px; }
-            .header-controls { flex-direction: column; gap: 8px; width: 100%; }
+            .header-controls { flex-direction: column; gap: 8px; width: 100%; align-items: center; }
             .header-stats { width: 100%; justify-content: center; box-sizing: border-box; }
             
             /* Mobile Sidebar: Exactly 15% width on the side */
@@ -184,11 +196,12 @@
                 padding: 6px;
                 gap: 8px;
             }
+            .sidebar-list-btn { font-size: 9px; padding: 6px 2px; }
             .ad-container {
                 padding: 6px 4px;
             }
             .ad-container h2 { font-size: 11px; margin-bottom: 2px; }
-            .ad-container p { display: none; } /* Hide description text on mobile to save vertical space */
+            .ad-container p { display: none; }
             .ad-container .btn { padding: 3px 4px; font-size: 9px; }
 
             .filter-overlay { left: 15px; top: 10px; right: 15px; } 
@@ -201,7 +214,7 @@
         <h1>🌱 Grovia Fresh from the Farm!</h1>
         <div class="header-controls">
             <div class="header-stats">
-                <span class="main-stat-label"> Visitors:</span>
+                <span class="main-stat-label">👥 Visitors:</span>
                 <div class="stat-item">
                     <span class="stat-label">Month:</span>
                     <span id="monthly-count" class="stat-value">...</span>
@@ -212,13 +225,14 @@
                     <span id="total-count" class="stat-value">...</span>
                 </div>
             </div>
-            <a href="add.html" class="btn">+ List Your Stand ($25)</a>
         </div>
     </header>
 
     <div class="main-content">
         
         <aside class="sidebar">
+            <a href="add.html" class="btn sidebar-list-btn">+ List Your Stand ($25)</a>
+
             <div class="ad-container">
                 <h2>Advertise Here!</h2>
                 <p>Feature your business next to the map.</p>
@@ -316,6 +330,20 @@
             maxZoom: 19,
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+                    map.setView([userLat, userLng], 11);
+                },
+                (error) => {
+                    console.log("Geolocation permission denied or unavailable. Using default view.");
+                },
+                { timeout: 10000 }
+            );
+        }
 
         function safeText(str) {
             return String(str || '').replace(/[&<>'"]/g, 
