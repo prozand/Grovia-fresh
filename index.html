@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grovia - Southern Ontario Farm Directory</title>
+    <title>Grovia - Fresh from the Farm Directory</title>
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -22,18 +22,34 @@
         header {
             background-color: #2c5e3b;
             color: white;
-            padding: 15px 25px;
+            padding: 12px 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             z-index: 2000;
         }
-        h1 { margin: 0; font-size: 24px; }
-        .header-controls { display: flex; gap: 10px; align-items: center; }
+        h1 { margin: 0; font-size: 22px; }
+        .header-controls { display: flex; gap: 20px; align-items: center; }
+        
+        /* Header Visitor Counter Styling */
+        .header-stats {
+            display: flex;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .stat-item { display: flex; gap: 5px; align-items: center; }
+        .stat-label { color: #d1e7dd; font-weight: normal; }
+        .stat-value { color: #ffb74d; font-weight: bold; }
+
         .btn {
             background-color: #e65100; color: white; text-decoration: none;
-            padding: 10px 18px; font-weight: bold; border-radius: 6px;
+            padding: 9px 16px; font-weight: bold; border-radius: 6px;
             font-size: 14px; border: none; cursor: pointer;
         }
         .btn:hover { background-color: #bf360c; }
@@ -47,7 +63,7 @@
         }
 
         .sidebar {
-            width: 10%OF;
+            width: 10%;
             min-width: 220px;
             background-color: #f4f7f6;
             padding: 15px;
@@ -59,21 +75,6 @@
             overflow-y: auto; 
             gap: 15px; 
         }
-        
-        /* Dual Visitor Counter Widget Styles */
-        .counter-container {
-            text-align: center;
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            border: 2px solid #2c5e3b;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            flex-shrink: 0;
-        }
-        .counter-container h3 { color: #2c5e3b; margin: 0 0 10px 0; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 6px; }
-        .counter-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 13px; color: #555; }
-        .counter-row:last-child { margin-bottom: 0; }
-        .counter-value { font-weight: bold; color: #e65100; font-size: 15px; }
 
         .ad-container {
             text-align: center;
@@ -171,7 +172,9 @@
 
         @media (max-width: 768px) {
             header { flex-direction: column; gap: 10px; padding: 12px; text-align: center; }
-            h1 { font-size: 20px; }
+            h1 { font-size: 18px; }
+            .header-controls { flex-direction: column; gap: 8px; width: 100%; }
+            .header-stats { width: 100%; justify-content: center; box-sizing: border-box; }
             .main-content { flex-direction: column-reverse; }
             .sidebar { width: 100%; min-width: 100%; height: 25%; padding: 12px; }
             .map-wrapper { height: 75%; flex-grow: 1; }
@@ -182,8 +185,19 @@
 <body>
 
     <header>
-        <h1>🌱 Grovia Fresh from the Farm!</h1>
+        <h1>🌱 Grovia is Fresh from the Farm!</h1>
         <div class="header-controls">
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Month:</span>
+                    <span id="monthly-count" class="stat-value">...</span>
+                </div>
+                <div style="color: rgba(255,255,255,0.3);">|</div>
+                <div class="stat-item">
+                    <span class="stat-label">All-Time:</span>
+                    <span id="total-count" class="stat-value">...</span>
+                </div>
+            </div>
             <a href="add.html" class="btn">+ List Your Stand ($25)</a>
         </div>
     </header>
@@ -191,37 +205,24 @@
     <div class="main-content">
         
         <aside class="sidebar">
-            <!-- Dual Visitor Counter Widget at the Top -->
-            <div class="counter-container">
-                <h3>Visitor Statistics</h3>
-                <div class="counter-row">
-                    <span>This Month:</span>
-                    <span id="monthly-count" class="counter-value">...</span>
-                </div>
-                <div class="counter-row">
-                    <span>All-Time:</span>
-                    <span id="total-count" class="counter-value">...</span>
-                </div>
-            </div>
-
             <div class="ad-container">
                 <h2>Advertise Here!</h2>
-                <p>Feature your business next to the map.</p>
+                <p>Feature your business.</p>
                 <a href="advertise.html" class="btn btn-secondary">Contact Us</a>
             </div>
             <div class="ad-container">
                 <h2>Advertise Here!</h2>
-                <p>Feature your business next to the map.</p>
+                <p>Get Found on Grovia.</p>
                 <a href="advertise.html" class="btn btn-secondary">Contact Us</a>
             </div>
             <div class="ad-container">
                 <h2>Advertise Here!</h2>
-                <p>Feature your business next to the map.</p>
+                <p>Feature your business.</p>
                 <a href="advertise.html" class="btn btn-secondary">Contact Us</a>
             </div>
             <div class="ad-container">
                 <h2>Advertise Here!</h2>
-                <p>Feature your business next to the map.</p>
+                <p>Show us what you got!.</p>
                 <a href="advertise.html" class="btn btn-secondary">Contact Us</a>
             </div>
         </aside>
@@ -258,11 +259,10 @@
         async function trackAndDisplayVisitors() {
             try {
                 const now = new Date();
-                const monthKey = `${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, '0')}`; // e.g., "2026_10"
+                const monthKey = `${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, '0')}`;
                 const keys = ['all_time', monthKey];
 
                 for (const key of keys) {
-                    // Fetch current count
                     let { data, error } = await dbClient
                         .from('site_counters')
                         .select('count')
@@ -272,19 +272,16 @@
                     let newCount = 1;
                     if (data) {
                         newCount = data.count + 1;
-                        // Update with incremented count
                         await dbClient
                             .from('site_counters')
                             .update({ count: newCount })
                             .eq('key', key);
                     } else {
-                        // Insert if key doesn't exist yet (e.g., new month transition)
                         await dbClient
                             .from('site_counters')
                             .insert([{ key: key, count: 1 }]);
                     }
 
-                    // Update UI elements
                     if (key === 'all_time') {
                         document.getElementById('total-count').textContent = newCount.toLocaleString();
                     } else {
