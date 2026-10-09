@@ -1,1 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grovia - Fresh from the Farm Directory</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f6f0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
 
+        header {
+            background-color: #388e3c; /* Brighter, vibrant farm green */
+            color: white;
+            padding: 12px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 2000;
+        }
+        h1 { margin: 0; font-size: 22px; }
+        .header-controls { display: flex; gap: 20px; align-items: center; }
+
+        /* Sidebar Visitor Counter Styling */
+        .sidebar-stats {
+            background: white;
+            padding: 12px 10px;
+            border-radius: 8px;
+            border: 2px solid #388e3c;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            font-size: 12px;
+            text-align: center;
+            flex-shrink: 0;
+            margin-top: auto; /* Pushes it to the bottom if sidebar has extra space */
+        }
+        .sidebar-stats-title { color: #388e3c; font-weight: bold; margin-bottom: 6px; border-bottom: 1px solid #eee; padding-bottom: 4px; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        .sidebar-stats-row { display: flex; justify-content: space-between; margin-bottom: 3px; color: #555; }
+        .sidebar-stats-row:last-child { margin-bottom: 0; }
+        .sidebar-stat-value { font-weight: bold; color: #e65100; }
+
+        .btn {
+            background-color: #e65100; color: white; text-decoration: none;
+            padding: 9px 16px; font-weight: bold; border-radius: 6px;
+            font-size: 14px; border: none; cursor: pointer;
+            text-align: center;
+            box-sizing: border-box;
+            display: inline-block;
+        }
+        .btn:hover { background-color: #bf360c; }
+        .btn-secondary { background-color: #1976d2; }
+        .btn-secondary:hover { background-color: #115293; }
+
+        .main-content {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden; 
+        }
+
+        .sidebar {
+            width: 10%;
+            min-width: 220px;
+            background-color: #f4f7f6;
+            padding: 15px;
+            box-sizing: border-box;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; 
+            gap: 15px; 
+        }
+
+        .sidebar-list-btn {
+            width: 100%;
+            font-size: 13px;
+            padding: 12px 10px;
+            background-color: #e65100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+
+        .ad-container {
+            text-align: center;
+            background: white;
+            padding: 20px 15px;
+            border-radius: 8px;
+            border: 2px dashed #388e3c;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            flex-shrink: 0; 
+        }
+        .ad-container h2 { color: #388e3c; margin: 0 0 8px 0; font-size: 18px; }
+        .ad-container p { color: #555; font-size: 13px; margin-bottom: 15px; line-height: 1.4; }
+        .ad-container .btn { padding: 8px 12px; font-size: 12px; }
+
+        .map-wrapper {
+            flex-grow: 1;
+            position: relative;
+        }
+        #map { width: 100%; height: 100%; }
+
+        /* Floating Filter Pills */
+        .filter-overlay {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            scrollbar-width: none; 
+        }
+        .filter-overlay::-webkit-scrollbar { display: none; }
+
+        .filter-pill {
+            background-color: white;
+            color: #333;
+            border: 2px solid #ddd;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+            user-select: none; 
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .filter-pill:hover { border-color: #388e3c; background-color: #f4f7f6; }
+        .filter-pill.active {
+            background-color: #388e3c;
+            color: white;
+            border-color: #388e3c;
+        }
+
+        /* High-Definition Colorful Map Pins with Emojis */
+        .custom-badge-pin { background: none; border: none; }
+        .badge-marker-inner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+            transition: transform 0.2s ease-out;
+        }
+        .badge-marker-inner:hover {
+            transform: scale(1.2);
+        }
+
+        /* Rich Colorful Gradients for Badges */
+        .badge-eggs { background: linear-gradient(135deg, #fef08a, #eab308); }
+        .badge-honey { background: linear-gradient(135deg, #fde047, #ca8a04); }
+        .badge-maple { background: linear-gradient(135deg, #fdba74, #c2410c); }
+        .badge-firewood { background: linear-gradient(135deg, #f87171, #b91c1c); }
+        .badge-flowers { background: linear-gradient(135deg, #f472b6, #db2777); }
+        .badge-veggies { background: linear-gradient(135deg, #4ade80, #15803d); }
+        .badge-fruits { background: linear-gradient(135deg, #fb7185, #e11d48); }
+        .badge-craft { background: linear-gradient(135deg, #60a5fa, #1d4ed8); }
+        .badge-beef { background: linear-gradient(135deg, #fca5a5, #991b1b); }
+        .badge-chicken { background: linear-gradient(135deg, #fed7aa, #c2410c); }
+        .badge-trees { background: linear-gradient(135deg, #86efac, #166534); }
+        .badge-antiques { background: linear-gradient(135deg, #d4d4d4, #525252); }
+        .badge-default { background: linear-gradient(135deg, #94a3b8, #475569); }
+
+        .leaflet-popup-content h3 { color: #388e3c; margin: 0 0 5px 0; }
+        .leaflet-popup-content p { margin: 4px 0; color: #555; }
+
+        @media (max-width: 768px) {
+            header { flex-direction: column; gap: 10px; padding: 12px; text-align: center; }
+            h1 { font-size: 18px; }
+            .header-controls { flex-direction: column; gap: 8px; width: 100%; align-items: center; }
+            
+            /* Mobile Sidebar: Exactly 15% width on the side */
+            .sidebar { 
+                width: 15vw; 
+                min-width: 90px;
+                padding: 6px;
+                gap: 8px;
+            }
+            .sidebar-list-btn { font-size: 9px; padding: 6px 2px; }
+            .ad-container {
+                padding: 6px 4px;
+            }
+            .ad-container h2 { font-size: 11px; margin-bottom: 2px; }
+            .ad-container p { display: none; }
+            .ad-container .btn { padding: 3px 4px; font-size: 9px; }
+            .sidebar-stats { padding: 6px 2px; font-size: 10px; }
+            .sidebar-stats-title { font-size: 10px; flex-direction: column; gap: 0; }
+
+            .filter-overlay { left: 15px; top: 10px; right: 15px; } 
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🌱 Grovia Fresh from the Farm!</h1>
+    </header>
+
+    <div class="main-content">
+        
+        <aside class="sidebar">
+            <a href="add.html" class="btn sidebar-list-btn">+ List Your Stand ($25)</a>
+
+            <div class="ad-container">
+                <h2>Advertise Here!</h2>
+                <p>Feature your business next to the map.</p>
+                <a href="advertise.html" class="btn btn-secondary">Contact Us</a>
+            </div>
+            <div class="ad-container">
+                <h2>Advertise Here!</h2>
+                <p>Feature your business next to the map.</p>
+                <a href="advertise.html" class="btn btn-secondary">Contact Us</a>
+            </div>
+            <div class="ad-container">
+                <h2>Advertise Here!</h2>
+                <p>Feature your business next to the map.</p>
+                <a href="advertise.html" class="btn btn-secondary">Contact Us</a>
+            </div>
+            <div class="ad-container">
+                <h2>Advertise Here!</h2>
+                <p>Feature your business next to the map.</p>
+                <a href="advertise.html" class="btn btn-secondary">Contact Us</a>
+            </div>
+
+            <!-- Visitor Counter at the Bottom of Sidebar -->
+            <div class="sidebar-stats">
+                <div class="sidebar-stats-title">👥 Visitors</div>
+                <div class="sidebar-stats-row">
+                    <span>Month:</span>
+                    <span id="monthly-count" class="sidebar-stat-value">...</span>
+                </div>
+                <div class="sidebar-stats-row">
+                    <span>Total:</span>
+                    <span id="total-count" class="sidebar-stat-value">...</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="map-wrapper">
+            <div class="filter-overlay" id="filter-container">
+                <button class="filter-pill" data-category="Eggs">🥚 Eggs</button>
+                <button class="filter-pill" data-category="Honey">🐝 Honey</button>
+                <button class="filter-pill" data-category="Maple Syrup">🍁 Maple Syrup</button>
+                <button class="filter-pill" data-category="Firewood">🔥 Firewood</button>
+                <button class="filter-pill" data-category="Fresh Flowers">💐 Flowers</button>
+                <button class="filter-pill" data-category="Veggies">🥕 Veggies</button>
+                <button class="filter-pill" data-category="Fruits">🍎 Fruits</button>
+                <button class="filter-pill" data-category="Arts & Craft">🎨 Craft</button>
+                <button class="filter-pill" data-category="Beef">🥩 Beef</button>
+                <button class="filter-pill" data-category="Chicken">🍗 Chicken</button>
+                <button class="filter-pill" data-category="Christmas Trees">🎄 Trees</button>
+                <button class="filter-pill" data-category="Antiques">🪑 Antiques</button>
+            </div>
+            <div id="map"></div>
+        </main>
+        
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        const SUPABASE_URL = 'https://xlftvjrhzklunsbaxcur.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
+        const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function trackAndDisplayVisitors() {
+            try {
+                const now = new Date();
+                const monthKey = `${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, '0')}`;
+                const keys = ['all_time', monthKey];
+
+                for (const key of keys) {
+                    let { data, error } = await dbClient
+                        .from('site_counters')
+                        .select('count')
+                        .eq('key', key)
+                        .single();
+
+                    let newCount = 1;
+                    if (data) {
+                        newCount = data.count + 1;
+                        await dbClient
+                            .from('site_counters')
+                            .update({ count: newCount })
+                            .eq('key', key);
+                    } else {
+                        await dbClient
+                            .from('site_counters')
+                            .insert([{ key: key, count: 1 }]);
+                    }
+
+                    if (key === 'all_time') {
+                        document.getElementById('total-count').textContent = newCount.toLocaleString();
+                    } else {
+                        document.getElementById('monthly-count').textContent = newCount.toLocaleString();
+                    }
+                }
+            } catch (err) {
+                console.error("Supabase visitor counter error:", err);
+                document.getElementById('total-count').textContent = "1+";
+                document.getElementById('monthly-count').textContent = "1+";
+            }
+        }
+        trackAndDisplayVisitors();
+
+        const map = L.map('map', { zoomControl: false }).setView([44.05, -79.85], 10);
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+                    map.setView([userLat, userLng], 11);
+                },
+                (error) => {
+                    console.log("Geolocation permission denied or unavailable. Using default view.");
+                },
+                { timeout: 10000 }
+            );
+        }
+
+        function safeText(str) {
+            return String(str || '').replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        const CATEGORY_CONFIG = {
+            "Eggs": { emoji: "🥚", cssClass: 'badge-eggs' },
+            "Honey": { emoji: "🐝", cssClass: 'badge-honey' },
+            "Maple Syrup": { emoji: "🍁", cssClass: 'badge-maple' },
+            "Firewood": { emoji: "🔥", cssClass: 'badge-firewood' },
+            "Fresh Flowers": { emoji: "💐", cssClass: 'badge-flowers' },
+            "Veggies": { emoji: "🥕", cssClass: 'badge-veggies' },
+            "Fruits": { emoji: "🍎", cssClass: 'badge-fruits' },
+            "Arts & Craft": { emoji: "🎨", cssClass: 'badge-craft' },
+            "Beef": { emoji: "🥩", cssClass: 'badge-beef' },
+            "Chicken": { emoji: "🍗", cssClass: 'badge-chicken' },
+            "Christmas Trees": { emoji: "🎄", cssClass: 'badge-trees' },
+            "Antiques": { emoji: "🪑", cssClass: 'badge-antiques' }
+        };
+
+        let allFarms = [];
+        let activeMarkers = [];
+        let activeFilters = []; 
+
+        async function loadActiveFarms() {
+            try {
+                const { data: farms, error } = await dbClient
+                    .from('farms')
+                    .select('*')
+                    .eq('Active', true);
+
+                if (error) throw error;
+
+                if (farms && farms.length > 0) {
+                    allFarms = farms; 
+                    renderMarkers();  
+                }
+            } catch (err) {
+                console.error("Error loading active farms:", err);
+            }
+        }
+
+        function renderMarkers() {
+            activeMarkers.forEach(marker => map.removeLayer(marker));
+            activeMarkers = [];
+
+            allFarms.forEach(farm => {
+                if (farm.Latitude && farm.Longitude) {
+                    
+                    const farmProducts = farm.Products || "";
+                    
+                    if (activeFilters.length > 0) {
+                        const matchesAllFilters = activeFilters.every(filter => farmProducts.includes(filter));
+                        if (!matchesAllFilters) return; 
+                    }
+
+                    let pinEmoji = "🌱";
+                    let pinClass = 'badge-default';
+
+                    if (farm.Primary_Product && CATEGORY_CONFIG[farm.Primary_Product]) {
+                        pinEmoji = CATEGORY_CONFIG[farm.Primary_Product].emoji;
+                        pinClass = CATEGORY_CONFIG[farm.Primary_Product].cssClass;
+                    }
+
+                    const customIcon = L.divIcon({
+                        className: 'custom-badge-pin',
+                        html: `<div class="badge-marker-inner ${pinClass}">${pinEmoji}</div>`,
+                        iconSize: [44, 44],
+                        iconAnchor: [22, 22],
+                        popupAnchor: [0, -18]
+                    });
+
+                    const popupContent = `
+                        <div>
+                            <h3>${safeText(farm.title)}</h3>
+                            <p><strong>Address:</strong> ${safeText(farm.Address)}</p>
+                            <p><strong>Products:</strong> ${safeText(farm.Products)}</p>
+                        </div>
+                    `;
+                    
+                    const marker = L.marker([farm.Latitude, farm.Longitude], { icon: customIcon })
+                        .addTo(map)
+                        .bindPopup(popupContent);
+                    
+                    activeMarkers.push(marker); 
+                }
+            });
+        }
+
+        document.querySelectorAll('.filter-pill').forEach(pill => {
+            pill.addEventListener('click', (e) => {
+                const selectedCategory = e.currentTarget.getAttribute('data-category');
+                
+                e.currentTarget.classList.toggle('active');
+
+                if (e.currentTarget.classList.contains('active')) {
+                    activeFilters.push(selectedCategory);
+                } else {
+                    activeFilters = activeFilters.filter(filter => filter !== selectedCategory);
+                }
+
+                renderMarkers();
+            });
+        });
+
+        loadActiveFarms();
+    </script>
+</body>
+</html>
