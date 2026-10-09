@@ -47,30 +47,31 @@
         }
 
         .sidebar {
-            width: 20%;
-            min-width: 280px;
+            width: 10%;
+            min-width: 220px; /* Slimmer footprint while ensuring ads remain readable */
             background-color: #f4f7f6;
-            padding: 20px;
+            padding: 15px;
             box-sizing: border-box;
             box-shadow: 2px 0 8px rgba(0,0,0,0.1);
             z-index: 1000;
             display: flex;
             flex-direction: column;
             overflow-y: auto; 
-            gap: 20px; 
+            gap: 15px; 
         }
         
         .ad-container {
             text-align: center;
             background: white;
-            padding: 30px 20px;
+            padding: 20px 15px;
             border-radius: 8px;
             border: 2px dashed #2c5e3b;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             flex-shrink: 0; 
         }
-        .ad-container h2 { color: #2c5e3b; margin: 0 0 10px 0; font-size: 22px; }
-        .ad-container p { color: #555; font-size: 15px; margin-bottom: 25px; line-height: 1.4; }
+        .ad-container h2 { color: #2c5e3b; margin: 0 0 8px 0; font-size: 18px; }
+        .ad-container p { color: #555; font-size: 13px; margin-bottom: 15px; line-height: 1.4; }
+        .ad-container .btn { padding: 8px 12px; font-size: 12px; }
 
         .map-wrapper {
             flex-grow: 1;
@@ -153,12 +154,14 @@
         .leaflet-popup-content h3 { color: #2c5e3b; margin: 0 0 5px 0; }
         .leaflet-popup-content p { margin: 4px 0; color: #555; }
 
+        /* Mobile Adjustments: Stack layout and give map priority */
         @media (max-width: 768px) {
-            header { flex-direction: column; gap: 10px; padding: 15px; text-align: center; }
-            .main-content { flex-direction: column; }
-            .sidebar { width: 100%; height: 35%; padding: 15px; }
-            .map-wrapper { height: 65%; flex-grow: 1; }
-            .filter-overlay { left: 15px; top: 10px; } 
+            header { flex-direction: column; gap: 10px; padding: 12px; text-align: center; }
+            h1 { font-size: 20px; }
+            .main-content { flex-direction: column-reverse; } /* Puts map on top for mobile shoppers */
+            .sidebar { width: 100%; min-width: 100%; height: 25%; padding: 12px; }
+            .map-wrapper { height: 75%; flex-grow: 1; }
+            .filter-overlay { left: 10px; top: 10px; right: 10px; } 
         }
     </style>
 </head>
@@ -176,23 +179,23 @@
         
         <aside class="sidebar">
             <div class="ad-container">
-                <h2>Advertise Your Farm Here!</h2>
-                <p>Want your farm featured directly next to the map?</p>
+                <h2>Advertise Here!</h2>
+                <p>Feature your business next to the map.</p>
                 <a href="mailto:info@grovia.ca" class="btn btn-secondary">Contact Us</a>
             </div>
             <div class="ad-container">
-                <h2>Advertise Your Farm Here!</h2>
-                <p>Want your farm featured directly next to the map?</p>
+                <h2>Advertise Here!</h2>
+                <p>Feature your business next to the map.</p>
                 <a href="mailto:info@grovia.ca" class="btn btn-secondary">Contact Us</a>
             </div>
             <div class="ad-container">
-                <h2>Advertise Your Farm Here!</h2>
-                <p>Want your farm featured directly next to the map?</p>
+                <h2>Advertise Here!</h2>
+                <p>Feature your business next to the map.</p>
                 <a href="mailto:info@grovia.ca" class="btn btn-secondary">Contact Us</a>
             </div>
             <div class="ad-container">
-                <h2>Advertise Your Farm Here!</h2>
-                <p>Want your farm featured directly next to the map?</p>
+                <h2>Advertise Here!</h2>
+                <p>Feature your business next to the map.</p>
                 <a href="mailto:info@grovia.ca" class="btn btn-secondary">Contact Us</a>
             </div>
         </aside>
