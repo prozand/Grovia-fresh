@@ -144,6 +144,8 @@
         .badge-veggies { background: linear-gradient(135deg, #4ade80, #15803d); }
         .badge-fruits { background: linear-gradient(135deg, #fb7185, #e11d48); }
         .badge-craft { background: linear-gradient(135deg, #60a5fa, #1d4ed8); }
+        .badge-beef { background: linear-gradient(135deg, #fca5a5, #991b1b); }
+        .badge-chicken { background: linear-gradient(135deg, #fed7aa, #c2410c); }
         .badge-default { background: linear-gradient(135deg, #94a3b8, #475569); }
 
         .leaflet-popup-content h3 { color: #2c5e3b; margin: 0 0 5px 0; }
@@ -203,6 +205,8 @@
                 <button class="filter-pill" data-category="Veggies">🥕 Veggies</button>
                 <button class="filter-pill" data-category="Fruits">🍎 Fruits</button>
                 <button class="filter-pill" data-category="Arts & Craft">🎨 Craft</button>
+                <button class="filter-pill" data-category="Beef">🥩 Beef</button>
+                <button class="filter-pill" data-category="Chicken">🍗 Chicken</button>
             </div>
             <div id="map"></div>
         </main>
@@ -231,7 +235,6 @@
             );
         }
 
-        // Configuration linking primary products to Unicode Emojis and rich color badge classes
         const CATEGORY_CONFIG = {
             "Eggs": { emoji: "🥚", cssClass: 'badge-eggs' },
             "Honey": { emoji: "🐝", cssClass: 'badge-honey' },
@@ -240,7 +243,9 @@
             "Fresh Flowers": { emoji: "💐", cssClass: 'badge-flowers' },
             "Veggies": { emoji: "🥕", cssClass: 'badge-veggies' },
             "Fruits": { emoji: "🍎", cssClass: 'badge-fruits' },
-            "Arts & Craft": { emoji: "🎨", cssClass: 'badge-craft' }
+            "Arts & Craft": { emoji: "🎨", cssClass: 'badge-craft' },
+            "Beef": { emoji: "🥩", cssClass: 'badge-beef' },
+            "Chicken": { emoji: "🍗", cssClass: 'badge-chicken' }
         };
 
         let allFarms = [];
@@ -279,7 +284,6 @@
                         if (!matchesAllFilters) return; 
                     }
 
-                    // Look up primary product configuration for unicode emojis
                     let pinEmoji = "🌱";
                     let pinClass = 'badge-default';
 
