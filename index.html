@@ -68,10 +68,10 @@
         .main-content {
             display: flex;
             flex-grow: 1;
-            overflow: hidden; /* Prevents the whole page from scrolling */
+            overflow: hidden; 
         }
 
-        /* Sidebar Styling (Desktop 20%) */
+        /* Sidebar Styling */
         .sidebar {
             width: 20%;
             min-width: 280px;
@@ -79,45 +79,31 @@
             padding: 20px;
             box-sizing: border-box;
             box-shadow: 2px 0 8px rgba(0,0,0,0.1);
-            overflow-y: auto;
             z-index: 1000;
             display: flex;
             flex-direction: column;
         }
-        .sidebar h2 {
-            margin-top: 0;
-            margin-bottom: 5px;
-            color: #2c5e3b;
-            font-size: 20px;
-        }
-        .sidebar p.subtitle {
-            color: #555;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
         
-        #farm-list {
-            flex-grow: 1;
-            overflow-y: auto;
-        }
-
-        .farm-card {
+        /* Advertisement Container */
+        .ad-container {
+            margin-top: 20px;
+            text-align: center;
             background: white;
-            padding: 15px;
-            margin-bottom: 15px;
+            padding: 30px 20px;
             border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border-left: 4px solid #2c5e3b;
+            border: 2px dashed #2c5e3b;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        .farm-card h3 {
-            margin: 0 0 5px 0;
-            font-size: 16px;
-            color: #333;
+        .ad-container h2 {
+            color: #2c5e3b;
+            margin: 0 0 10px 0;
+            font-size: 22px;
         }
-        .farm-card p {
-            margin: 4px 0;
-            font-size: 13px;
-            color: #666;
+        .ad-container p {
+            color: #555;
+            font-size: 15px;
+            margin-bottom: 25px;
+            line-height: 1.4;
         }
 
         /* Map Wrapper */
@@ -140,7 +126,7 @@
             color: #555;
         }
 
-        /* Mobile Responsiveness: Screens smaller than 768px */
+        /* Mobile Responsiveness */
         @media (max-width: 768px) {
             header {
                 flex-direction: column;
@@ -149,21 +135,18 @@
                 text-align: center;
             }
             .main-content {
-                flex-direction: column; /* Stack map and sidebar */
+                flex-direction: column; 
             }
             .sidebar {
                 width: 100%;
-                height: 35%; /* Sidebar takes up top third on mobile */
+                height: auto; 
                 min-width: auto;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.1);
                 padding: 15px;
             }
             .map-wrapper {
-                height: 65%; /* Map takes remaining space */
-            }
-            .farm-card {
-                padding: 10px;
-                margin-bottom: 10px;
+                height: 65%; 
+                flex-grow: 1;
             }
         }
     </style>
@@ -184,10 +167,10 @@
         
         <!-- Directory Sidebar -->
         <aside class="sidebar">
-            <h2>Local Directory</h2>
-            <p class="subtitle">Active stands near you.</p>
-            <div id="farm-list">
-                <p>Loading active stands...</p>
+            <div class="ad-container">
+                <h2>Advertise Your Farm Here!</h2>
+                <p>Want your farm featured directly next to the map?</p>
+                <a href="mailto:info@grovia.ca" class="btn btn-secondary">Contact Us</a>
             </div>
         </aside>
 
@@ -226,7 +209,7 @@
             );
         }
 
-        // Load active farm markers from Supabase
+        // Load active farm markers from Supabase (Only loads map markers now)
         async function loadActiveFarms() {
             try {
                 const { data: farms, error } = await dbClient
@@ -236,9 +219,6 @@
 
                 if (error) throw error;
 
-                const farmListDiv = document.getElementById('farm-list');
-                farmListDiv.innerHTML = ''; // Clear loading text
-
                 if (farms && farms.length > 0) {
                     farms.forEach(farm => {
                         if (farm.Latitude && farm.Longitude) {
@@ -247,4 +227,60 @@
                             const popupContent = `
                                 <div>
                                     <h3>${safeText(farm.title)}</h3>
-                                    <p><strong>Address:</strong> ${safeText(farm.Address
+                                    <p><strong>Address:</strong> ${safeText(farm.Address)}</p>
+                                    <p><strong>Products:</strong> ${safeText(farm.Products)}</p>
+                                </div>
+                            `;
+                            
+                            // 2. Add Marker to Map
+                            L.marker([farm.Latitude, farm.Longitude])
+                             .addTo(map)
+                             .bindPopup(popupContent);
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error("Error loading active farms:", err);
+            }
+        }
+
+        // Request user geolocation on load and zoom to ~25km radius (Zoom level 11)
+        function initUserLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const userLat = position.coords.latitude;
+                        const userLng = position.coords.longitude;
+                        
+                        // Set map view to user location at zoom level 11 (~25km radius scope)
+                        map.setView([userLat, userLng], 11);
+
+                        // Add a subtle blue marker for the user's location
+                        L.circleMarker([userLat, userLng], {
+                            radius: 8,
+                            fillColor: '#1976d2',
+                            color: '#fff',
+                            weight: 2,
+                            opacity: 1,
+                            fillOpacity: 0.9
+                        }).addTo(map).bindPopup("<b>You are here</b>");
+                    },
+                    (error) => {
+                        console.warn("Geolocation permission denied or unavailable:", error.message);
+                    },
+                    { timeout: 10000, maximumAge: 60000 }
+                );
+            }
+        }
+
+        // Hook up the manual "My Location" button in the header
+        document.getElementById('locate-btn').addEventListener('click', () => {
+            initUserLocation();
+        });
+
+        // Run startup routines
+        loadActiveFarms();
+        initUserLocation();
+    </script>
+</body>
+</html>
