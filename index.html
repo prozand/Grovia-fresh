@@ -7,7 +7,6 @@
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Font Awesome for Professional Vector Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     
     <style>
@@ -97,52 +96,56 @@
 
         .filter-pill {
             background-color: white;
-            color: #2c5e3b;
-            border: 2px solid #2c5e3b;
+            color: #333;
+            border: 2px solid #ddd;
             padding: 8px 16px;
             border-radius: 20px;
             font-weight: bold;
             font-size: 14px;
             cursor: pointer;
             white-space: nowrap;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             transition: all 0.2s ease;
             user-select: none; 
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
-        .filter-pill i { font-size: 14px; }
-        .filter-pill:hover { background-color: #e8f5e9; }
+        .filter-pill:hover { border-color: #2c5e3b; background-color: #f4f7f6; }
         .filter-pill.active {
             background-color: #2c5e3b;
             color: white;
+            border-color: #2c5e3b;
         }
 
-        /* Custom Vector Map Pin Marker Styles */
-        .custom-vector-pin {
-            background: none;
-            border: none;
-        }
-        .icon-marker-inner {
+        /* High-Definition Colorful Map Pins */
+        .custom-badge-pin { background: none; border: none; }
+        .badge-marker-inner {
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 18px; /* Perfectly sized for vectors */
-            color: #2c5e3b; /* Matches your Grovia green theme */
-            background-color: white;
-            border: 2px solid #2c5e3b;
+            font-size: 18px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
-            width: 38px;
-            height: 38px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            transition: transform 0.15s ease-out;
+            border: 3px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease-out;
         }
-        .icon-marker-inner:hover {
-            transform: scale(1.15);
-            background-color: #2c5e3b;
-            color: white;
+        .badge-marker-inner:hover {
+            transform: scale(1.2);
         }
+
+        /* Specific Rich Category Color Themes */
+        .badge-eggs { background: linear-gradient(135deg, #fef08a, #eab308); color: #713f12; }
+        .badge-honey { background: linear-gradient(135deg, #fde047, #ca8a04); color: #422006; }
+        .badge-maple { background: linear-gradient(135deg, #fdba74, #c2410c); color: #fff; }
+        .badge-firewood { background: linear-gradient(135deg, #f87171, #b91c1c); color: #fff; }
+        .badge-flowers { background: linear-gradient(135deg, #f472b6, #db2777); color: #fff; }
+        .badge-veggies { background: linear-gradient(135deg, #4ade80, #15803d); color: #fff; }
+        .badge-fruits { background: linear-gradient(135deg, #fb7185, #e11d48); color: #fff; }
+        .badge-craft { background: linear-gradient(135deg, #60a5fa, #1d4ed8); color: #fff; }
+        .badge-default { background: linear-gradient(135deg, #94a3b8, #475569); color: #fff; }
 
         .leaflet-popup-content h3 { color: #2c5e3b; margin: 0 0 5px 0; }
         .leaflet-popup-content p { margin: 4px 0; color: #555; }
@@ -192,16 +195,15 @@
         </aside>
 
         <main class="map-wrapper">
-            <!-- Filter Pills with Font Awesome Icons -->
             <div class="filter-overlay" id="filter-container">
-                <button class="filter-pill" data-category="Eggs"><i class="fa-solid fa-egg"></i> Eggs</button>
-                <button class="filter-pill" data-category="Honey"><i class="fa-solid fa-jar"></i> Honey</button>
-                <button class="filter-pill" data-category="Maple Syrup"><i class="fa-brands fa-canadian-maple-leaf"></i> Maple Syrup</button>
-                <button class="filter-pill" data-category="Firewood"><i class="fa-solid fa-fire"></i> Firewood</button>
-                <button class="filter-pill" data-category="Fresh Flowers"><i class="fa-solid fa-seedling"></i> Flowers</button>
-                <button class="filter-pill" data-category="Veggies"><i class="fa-solid fa-carrot"></i> Veggies</button>
-                <button class="filter-pill" data-category="Fruits"><i class="fa-solid fa-apple-whole"></i> Fruits</button>
-                <button class="filter-pill" data-category="Arts & Craft"><i class="fa-solid fa-palette"></i> Craft</button>
+                <button class="filter-pill" data-category="Eggs"><i class="fa-solid fa-egg" style="color: #ca8a04;"></i> Eggs</button>
+                <button class="filter-pill" data-category="Honey"><i class="fa-solid fa-jar" style="color: #d97706;"></i> Honey</button>
+                <button class="filter-pill" data-category="Maple Syrup"><i class="fa-brands fa-canadian-maple-leaf" style="color: #c2410c;"></i> Maple Syrup</button>
+                <button class="filter-pill" data-category="Firewood"><i class="fa-solid fa-fire" style="color: #dc2626;"></i> Firewood</button>
+                <button class="filter-pill" data-category="Fresh Flowers"><i class="fa-solid fa-seedling" style="color: #db2777;"></i> Flowers</button>
+                <button class="filter-pill" data-category="Veggies"><i class="fa-solid fa-carrot" style="color: #16a34a;"></i> Veggies</button>
+                <button class="filter-pill" data-category="Fruits"><i class="fa-solid fa-apple-whole" style="color: #e11d48;"></i> Fruits</button>
+                <button class="filter-pill" data-category="Arts & Craft"><i class="fa-solid fa-palette" style="color: #2563eb;"></i> Craft</button>
             </div>
             <div id="map"></div>
         </main>
@@ -230,16 +232,16 @@
             );
         }
 
-        // Configuration Map connecting text labels to specific Font Awesome tags
-        const CATEGORY_ICONS = {
-            "Eggs": '<i class="fa-solid fa-egg"></i>',
-            "Honey": '<i class="fa-solid fa-jar"></i>',
-            "Maple Syrup": '<i class="fa-brands fa-canadian-maple-leaf"></i>',
-            "Firewood": '<i class="fa-solid fa-fire"></i>',
-            "Fresh Flowers": '<i class="fa-solid fa-seedling"></i>',
-            "Veggies": '<i class="fa-solid fa-carrot"></i>',
-            "Fruits": '<i class="fa-solid fa-apple-whole"></i>',
-            "Arts & Craft": '<i class="fa-solid fa-palette"></i>'
+        // Configuration linking primary products to specific FontAwesome icons and color classes
+        const CATEGORY_CONFIG = {
+            "Eggs": { icon: '<i class="fa-solid fa-egg"></i>', cssClass: 'badge-eggs' },
+            "Honey": { icon: '<i class="fa-solid fa-jar"></i>', cssClass: 'badge-honey' },
+            "Maple Syrup": { icon: '<i class="fa-brands fa-canadian-maple-leaf"></i>', cssClass: 'badge-maple' },
+            "Firewood": { icon: '<i class="fa-solid fa-fire"></i>', cssClass: 'badge-firewood' },
+            "Fresh Flowers": { icon: '<i class="fa-solid fa-seedling"></i>', cssClass: 'badge-flowers' },
+            "Veggies": { icon: '<i class="fa-solid fa-carrot"></i>', cssClass: 'badge-veggies' },
+            "Fruits": { icon: '<i class="fa-solid fa-apple-whole"></i>', cssClass: 'badge-fruits' },
+            "Arts & Craft": { icon: '<i class="fa-solid fa-palette"></i>', cssClass: 'badge-craft' }
         };
 
         let allFarms = [];
@@ -278,18 +280,21 @@
                         if (!matchesAllFilters) return; 
                     }
 
-                    // Look directly at the Primary_Product column to inject the vector icon
-                    let pinIcon = '<i class="fa-solid fa-leaf"></i>'; // Fallback icon
-                    if (farm.Primary_Product && CATEGORY_ICONS[farm.Primary_Product]) {
-                        pinIcon = CATEGORY_ICONS[farm.Primary_Product];
+                    // Look up primary product configuration
+                    let pinIcon = '<i class="fa-solid fa-leaf"></i>';
+                    let pinClass = 'badge-default';
+
+                    if (farm.Primary_Product && CATEGORY_CONFIG[farm.Primary_Product]) {
+                        pinIcon = CATEGORY_CONFIG[farm.Primary_Product].icon;
+                        pinClass = CATEGORY_CONFIG[farm.Primary_Product].cssClass;
                     }
 
                     const customIcon = L.divIcon({
-                        className: 'custom-vector-pin',
-                        html: `<div class="icon-marker-inner">${pinIcon}</div>`,
-                        iconSize: [38, 38],
-                        iconAnchor: [19, 19],
-                        popupAnchor: [0, -15]
+                        className: 'custom-badge-pin',
+                        html: `<div class="badge-marker-inner ${pinClass}">${pinIcon}</div>`,
+                        iconSize: [42, 42],
+                        iconAnchor: [21, 21],
+                        popupAnchor: [0, -18]
                     });
 
                     const popupContent = `
