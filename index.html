@@ -17,10 +17,11 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
+            overflow: hidden;
         }
 
         header {
-            background-color: #388e3c; /* Brighter, vibrant farm green */
+            background-color: #388e3c;
             color: white;
             padding: 12px 25px;
             display: flex;
@@ -30,84 +31,73 @@
             z-index: 2000;
         }
         h1 { margin: 0; font-size: 22px; }
-        .header-controls { display: flex; gap: 20px; align-items: center; }
-
-        /* Sidebar Visitor Counter Styling */
-        .sidebar-stats {
-            background: white;
-            padding: 12px 10px;
-            border-radius: 8px;
-            border: 2px solid #388e3c;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            font-size: 12px;
-            text-align: center;
-            flex-shrink: 0;
-            margin-top: auto; /* Pushes it to the bottom if sidebar has extra space */
-        }
-        .sidebar-stats-title { color: #388e3c; font-weight: bold; margin-bottom: 6px; border-bottom: 1px solid #eee; padding-bottom: 4px; display: flex; align-items: center; justify-content: center; gap: 4px; }
-        .sidebar-stats-row { display: flex; justify-content: space-between; margin-bottom: 3px; color: #555; }
-        .sidebar-stats-row:last-child { margin-bottom: 0; }
-        .sidebar-stat-value { font-weight: bold; color: #e65100; }
 
         .btn {
             background-color: #e65100; color: white; text-decoration: none;
-            padding: 9px 16px; font-weight: bold; border-radius: 6px;
-            font-size: 14px; border: none; cursor: pointer;
+            padding: 8px 16px; font-weight: bold; border-radius: 6px;
+            font-size: 13px; border: none; cursor: pointer;
             text-align: center;
             box-sizing: border-box;
             display: inline-block;
         }
         .btn:hover { background-color: #bf360c; }
-        .btn-secondary { background-color: #1976d2; }
+        .btn-secondary { background-color: #1976d2; padding: 4px 8px; font-size: 11px; }
         .btn-secondary:hover { background-color: #115293; }
-
-        .main-content {
-            display: flex;
-            flex-grow: 1;
-            overflow: hidden; 
-        }
-
-        .sidebar {
-            width: 10%;
-            min-width: 220px;
-            background-color: #f4f7f6;
-            padding: 15px;
-            box-sizing: border-box;
-            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto; 
-            gap: 15px; 
-        }
-
-        .sidebar-list-btn {
-            width: 100%;
-            font-size: 13px;
-            padding: 12px 10px;
-            background-color: #e65100;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            flex-shrink: 0;
-        }
-
-        .ad-container {
-            text-align: center;
-            background: white;
-            padding: 20px 15px;
-            border-radius: 8px;
-            border: 2px dashed #388e3c;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            flex-shrink: 0; 
-        }
-        .ad-container h2 { color: #388e3c; margin: 0 0 8px 0; font-size: 18px; }
-        .ad-container p { color: #555; font-size: 13px; margin-bottom: 15px; line-height: 1.4; }
-        .ad-container .btn { padding: 8px 12px; font-size: 12px; }
 
         .map-wrapper {
             flex-grow: 1;
             position: relative;
         }
         #map { width: 100%; height: 100%; }
+
+        /* Footer Layout */
+        footer {
+            background-color: #f4f7f6;
+            border-top: 2px solid #388e3c;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            z-index: 2000;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+        }
+
+        .footer-ads {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .footer-ad {
+            background: white;
+            border: 1px dashed #388e3c;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #388e3c;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .footer-ad a {
+            color: #1976d2;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .footer-ad a:hover { text-decoration: underline; }
+
+        .footer-stats {
+            font-size: 12px;
+            color: #555;
+            background: white;
+            padding: 6px 14px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+        .footer-stat-val { color: #e65100; font-weight: bold; }
 
         /* Floating Filter Pills */
         .filter-overlay {
@@ -185,27 +175,10 @@
         .leaflet-popup-content p { margin: 4px 0; color: #555; }
 
         @media (max-width: 768px) {
-            header { flex-direction: column; gap: 10px; padding: 12px; text-align: center; }
+            header { padding: 10px 15px; text-align: center; justify-content: center; }
             h1 { font-size: 18px; }
-            .header-controls { flex-direction: column; gap: 8px; width: 100%; align-items: center; }
-            
-            /* Mobile Sidebar: Exactly 15% width on the side */
-            .sidebar { 
-                width: 15vw; 
-                min-width: 90px;
-                padding: 6px;
-                gap: 8px;
-            }
-            .sidebar-list-btn { font-size: 9px; padding: 6px 2px; }
-            .ad-container {
-                padding: 6px 4px;
-            }
-            .ad-container h2 { font-size: 11px; margin-bottom: 2px; }
-            .ad-container p { display: none; }
-            .ad-container .btn { padding: 3px 4px; font-size: 9px; }
-            .sidebar-stats { padding: 6px 2px; font-size: 10px; }
-            .sidebar-stats-title { font-size: 10px; flex-direction: column; gap: 0; }
-
+            footer { padding: 8px 10px; justify-content: center; gap: 8px; }
+            .footer-ads { display: none; } /* Hide ad spots on mobile footer to save space */
             .filter-overlay { left: 15px; top: 10px; right: 15px; } 
         }
     </style>
@@ -216,65 +189,37 @@
         <h1>🌱 Grovia Fresh from the Farm!</h1>
     </header>
 
-    <div class="main-content">
+    <main class="map-wrapper">
+        <div class="filter-overlay" id="filter-container">
+            <button class="filter-pill" data-category="Eggs">🥚 Eggs</button>
+            <button class="filter-pill" data-category="Honey">🐝 Honey</button>
+            <button class="filter-pill" data-category="Maple Syrup">🍁 Maple Syrup</button>
+            <button class="filter-pill" data-category="Firewood">🔥 Firewood</button>
+            <button class="filter-pill" data-category="Fresh Flowers">💐 Flowers</button>
+            <button class="filter-pill" data-category="Veggies">🥕 Veggies</button>
+            <button class="filter-pill" data-category="Fruits">🍎 Fruits</button>
+            <button class="filter-pill" data-category="Arts & Craft">🎨 Craft</button>
+            <button class="filter-pill" data-category="Beef">🥩 Beef</button>
+            <button class="filter-pill" data-category="Chicken">🍗 Chicken</button>
+            <button class="filter-pill" data-category="Christmas Trees">🎄 Trees</button>
+            <button class="filter-pill" data-category="Antiques">🪑 Antiques</button>
+        </div>
+        <div id="map"></div>
+    </main>
+
+    <footer>
+        <a href="add.html" class="btn">+ List Your Stand ($25)</a>
         
-        <aside class="sidebar">
-            <a href="add.html" class="btn sidebar-list-btn">+ List Your Stand ($25)</a>
+        <div class="footer-ads">
+            <div class="footer-ad"><strong>Advertise Here!</strong> <a href="advertise.html" class="btn-secondary">Contact Us</a></div>
+            <div class="footer-ad"><strong>Advertise Here!</strong> <a href="advertise.html" class="btn-secondary">Contact Us</a></div>
+            <div class="footer-ad"><strong>Advertise Here!</strong> <a href="advertise.html" class="btn-secondary">Contact Us</a></div>
+        </div>
 
-            <div class="ad-container">
-                <h2>Advertise Here!</h2>
-                <p>Feature your business next to the map.</p>
-                <a href="advertise.html" class="btn btn-secondary">Contact Us</a>
-            </div>
-            <div class="ad-container">
-                <h2>Advertise Here!</h2>
-                <p>Feature your business next to the map.</p>
-                <a href="advertise.html" class="btn btn-secondary">Contact Us</a>
-            </div>
-            <div class="ad-container">
-                <h2>Advertise Here!</h2>
-                <p>Feature your business next to the map.</p>
-                <a href="advertise.html" class="btn btn-secondary">Contact Us</a>
-            </div>
-            <div class="ad-container">
-                <h2>Advertise Here!</h2>
-                <p>Feature your business next to the map.</p>
-                <a href="advertise.html" class="btn btn-secondary">Contact Us</a>
-            </div>
-
-            <!-- Visitor Counter at the Bottom of Sidebar -->
-            <div class="sidebar-stats">
-                <div class="sidebar-stats-title">👥 Visitors</div>
-                <div class="sidebar-stats-row">
-                    <span>Month:</span>
-                    <span id="monthly-count" class="sidebar-stat-value">...</span>
-                </div>
-                <div class="sidebar-stats-row">
-                    <span>Total:</span>
-                    <span id="total-count" class="sidebar-stat-value">...</span>
-                </div>
-            </div>
-        </aside>
-
-        <main class="map-wrapper">
-            <div class="filter-overlay" id="filter-container">
-                <button class="filter-pill" data-category="Eggs">🥚 Eggs</button>
-                <button class="filter-pill" data-category="Honey">🐝 Honey</button>
-                <button class="filter-pill" data-category="Maple Syrup">🍁 Maple Syrup</button>
-                <button class="filter-pill" data-category="Firewood">🔥 Firewood</button>
-                <button class="filter-pill" data-category="Fresh Flowers">💐 Flowers</button>
-                <button class="filter-pill" data-category="Veggies">🥕 Veggies</button>
-                <button class="filter-pill" data-category="Fruits">🍎 Fruits</button>
-                <button class="filter-pill" data-category="Arts & Craft">🎨 Craft</button>
-                <button class="filter-pill" data-category="Beef">🥩 Beef</button>
-                <button class="filter-pill" data-category="Chicken">🍗 Chicken</button>
-                <button class="filter-pill" data-category="Christmas Trees">🎄 Trees</button>
-                <button class="filter-pill" data-category="Antiques">🪑 Antiques</button>
-            </div>
-            <div id="map"></div>
-        </main>
-        
-    </div>
+        <div class="footer-stats">
+            <span>👥 Visitors — Month: <span id="monthly-count" class="footer-stat-val">...</span> | Total: <span id="total-count" class="footer-stat-val">...</span></span>
+        </div>
+    </footer>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
