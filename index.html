@@ -5,14 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grovia - Southern Ontario Farm Directory</title>
     
-    <!-- Favicon Fix -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
-    
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
-        /* Base page layout */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -23,7 +19,6 @@
             height: 100vh;
         }
 
-        /* Header Styles */
         header {
             background-color: #2c5e3b;
             color: white;
@@ -34,44 +29,23 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             z-index: 2000;
         }
-        h1 {
-            margin: 0;
-            font-size: 24px;
-        }
-        .header-controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
+        h1 { margin: 0; font-size: 24px; }
+        .header-controls { display: flex; gap: 10px; align-items: center; }
         .btn {
-            background-color: #e65100;
-            color: white;
-            text-decoration: none;
-            padding: 10px 18px;
-            font-weight: bold;
-            border-radius: 6px;
-            font-size: 14px;
-            border: none;
-            cursor: pointer;
+            background-color: #e65100; color: white; text-decoration: none;
+            padding: 10px 18px; font-weight: bold; border-radius: 6px;
+            font-size: 14px; border: none; cursor: pointer;
         }
-        .btn:hover {
-            background-color: #bf360c;
-        }
-        .btn-secondary {
-            background-color: #1976d2;
-        }
-        .btn-secondary:hover {
-            background-color: #115293;
-        }
+        .btn:hover { background-color: #bf360c; }
+        .btn-secondary { background-color: #1976d2; }
+        .btn-secondary:hover { background-color: #115293; }
 
-        /* Main app container below the header */
         .main-content {
             display: flex;
             flex-grow: 1;
             overflow: hidden; 
         }
 
-        /* Sidebar Styling */
         .sidebar {
             width: 20%;
             min-width: 280px;
@@ -82,11 +56,10 @@
             z-index: 1000;
             display: flex;
             flex-direction: column;
-            overflow-y: auto; /* Allows scrolling if ads overflow the screen */
-            gap: 20px; /* Creates even spacing between the ad boxes */
+            overflow-y: auto; 
+            gap: 20px; 
         }
         
-        /* Advertisement Container */
         .ad-container {
             text-align: center;
             background: white;
@@ -94,68 +67,67 @@
             border-radius: 8px;
             border: 2px dashed #2c5e3b;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            flex-shrink: 0; /* Prevents the boxes from squishing on small screens */
+            flex-shrink: 0; 
         }
-        .ad-container h2 {
-            color: #2c5e3b;
-            margin: 0 0 10px 0;
-            font-size: 22px;
-        }
-        .ad-container p {
-            color: #555;
-            font-size: 15px;
-            margin-bottom: 25px;
-            line-height: 1.4;
-        }
+        .ad-container h2 { color: #2c5e3b; margin: 0 0 10px 0; font-size: 22px; }
+        .ad-container p { color: #555; font-size: 15px; margin-bottom: 25px; line-height: 1.4; }
 
-        /* Map Wrapper */
         .map-wrapper {
             flex-grow: 1;
             position: relative;
         }
-        #map {
-            width: 100%;
-            height: 100%;
-        }
+        #map { width: 100%; height: 100%; }
 
-        /* Map Popups */
-        .leaflet-popup-content h3 {
+        /* Floating Filter Pills */
+        .filter-overlay {
+            position: absolute;
+            top: 15px;
+            left: 55px;
+            right: 15px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            scrollbar-width: none; 
+        }
+        .filter-overlay::-webkit-scrollbar { display: none; }
+
+        .filter-pill {
+            background-color: white;
             color: #2c5e3b;
-            margin: 0 0 5px 0;
+            border: 2px solid #2c5e3b;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            transition: all 0.2s ease;
+            /* Prevents users from accidentally selecting the text when clicking fast */
+            user-select: none; 
         }
-        .leaflet-popup-content p {
-            margin: 4px 0;
-            color: #555;
+        .filter-pill:hover { background-color: #e8f5e9; }
+        .filter-pill.active {
+            background-color: #2c5e3b;
+            color: white;
         }
 
-        /* Mobile Responsiveness */
+        .leaflet-popup-content h3 { color: #2c5e3b; margin: 0 0 5px 0; }
+        .leaflet-popup-content p { margin: 4px 0; color: #555; }
+
         @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                gap: 10px;
-                padding: 15px;
-                text-align: center;
-            }
-            .main-content {
-                flex-direction: column; 
-            }
-            .sidebar {
-                width: 100%;
-                height: 35%; /* Gives some space to scroll ads on mobile */
-                min-width: auto;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                padding: 15px;
-            }
-            .map-wrapper {
-                height: 65%; 
-                flex-grow: 1;
-            }
+            header { flex-direction: column; gap: 10px; padding: 15px; text-align: center; }
+            .main-content { flex-direction: column; }
+            .sidebar { width: 100%; height: 35%; padding: 15px; }
+            .map-wrapper { height: 65%; flex-grow: 1; }
+            .filter-overlay { left: 15px; top: 10px; } 
         }
     </style>
 </head>
 <body>
 
-    <!-- Header Area -->
     <header>
         <h1>🌱 Grovia Farm Directory</h1>
         <div class="header-controls">
@@ -164,29 +136,24 @@
         </div>
     </header>
 
-    <!-- App Area -->
     <div class="main-content">
         
-        <!-- Directory Sidebar -->
         <aside class="sidebar">
             <div class="ad-container">
                 <h2>Advertise Your Farm Here!</h2>
                 <p>Want your farm featured directly next to the map?</p>
                 <a href="mailto:info@grovia.ca" class="btn btn-secondary">Contact Us</a>
             </div>
-            
             <div class="ad-container">
                 <h2>Advertise Your Farm Here!</h2>
                 <p>Want your farm featured directly next to the map?</p>
                 <a href="mailto:info@grovia.ca" class="btn btn-secondary">Contact Us</a>
             </div>
-            
             <div class="ad-container">
                 <h2>Advertise Your Farm Here!</h2>
                 <p>Want your farm featured directly next to the map?</p>
                 <a href="mailto:info@grovia.ca" class="btn btn-secondary">Contact Us</a>
             </div>
-            
             <div class="ad-container">
                 <h2>Advertise Your Farm Here!</h2>
                 <p>Want your farm featured directly next to the map?</p>
@@ -194,42 +161,50 @@
             </div>
         </aside>
 
-        <!-- Map -->
         <main class="map-wrapper">
+            <!-- Filter Pills Overlay -->
+            <div class="filter-overlay" id="filter-container">
+                <button class="filter-pill" data-category="Eggs">Eggs</button>
+                <button class="filter-pill" data-category="Honey">Honey</button>
+                <button class="filter-pill" data-category="Maple Syrup">Maple Syrup</button>
+                <button class="filter-pill" data-category="Firewood">Firewood</button>
+                <button class="filter-pill" data-category="Fresh Flowers">Fresh Flowers</button>
+                <button class="filter-pill" data-category="Veggies">Veggies</button>
+                <button class="filter-pill" data-category="Fruits">Fruits</button>
+                <button class="filter-pill" data-category="Arts & Craft">Arts & Craft</button>
+            </div>
             <div id="map"></div>
         </main>
         
     </div>
 
-    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
-    <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <script>
-        // Initialize Map centered on Southern Ontario as fallback
-        const map = L.map('map').setView([44.05, -79.85], 10);
+        const map = L.map('map', { zoomControl: false }).setView([44.05, -79.85], 10);
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-        // Add OpenStreetMap tiles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
 
-        // Supabase Credentials
         const SUPABASE_URL = 'https://xlftvjrhzklunsbaxcur.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
         const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Escape helper for safe text rendering in popups
         function safeText(str) {
             return String(str || '').replace(/[&<>'"]/g, 
                 tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
             );
         }
 
-        // Load active farm markers from Supabase (Only loads map markers now)
+        // Global variables for multi-select filtering
+        let allFarms = [];
+        let activeMarkers = [];
+        let activeFilters = []; // Now an array to hold multiple categories!
+
         async function loadActiveFarms() {
             try {
                 const { data: farms, error } = await dbClient
@@ -240,65 +215,90 @@
                 if (error) throw error;
 
                 if (farms && farms.length > 0) {
-                    farms.forEach(farm => {
-                        if (farm.Latitude && farm.Longitude) {
-                            
-                            // 1. Build the Map Popup Content
-                            const popupContent = `
-                                <div>
-                                    <h3>${safeText(farm.title)}</h3>
-                                    <p><strong>Address:</strong> ${safeText(farm.Address)}</p>
-                                    <p><strong>Products:</strong> ${safeText(farm.Products)}</p>
-                                </div>
-                            `;
-                            
-                            // 2. Add Marker to Map
-                            L.marker([farm.Latitude, farm.Longitude])
-                             .addTo(map)
-                             .bindPopup(popupContent);
-                        }
-                    });
+                    allFarms = farms; 
+                    renderMarkers();  
                 }
             } catch (err) {
                 console.error("Error loading active farms:", err);
             }
         }
 
-        // Request user geolocation on load and zoom to ~25km radius (Zoom level 11)
+        function renderMarkers() {
+            // 1. Clear existing markers
+            activeMarkers.forEach(marker => map.removeLayer(marker));
+            activeMarkers = [];
+
+            // 2. Loop through farms and apply filters
+            allFarms.forEach(farm => {
+                if (farm.Latitude && farm.Longitude) {
+                    
+                    // If the user has selected any filters, make sure the farm has ALL of them
+                    if (activeFilters.length > 0) {
+                        const farmProducts = farm.Products || "";
+                        
+                        // .every() means the farm must contain EVERY filter the user clicked
+                        const matchesAllFilters = activeFilters.every(filter => farmProducts.includes(filter));
+                        
+                        if (!matchesAllFilters) {
+                            return; // Skip drawing this farm if it doesn't have everything requested
+                        }
+                    }
+
+                    const popupContent = `
+                        <div>
+                            <h3>${safeText(farm.title)}</h3>
+                            <p><strong>Address:</strong> ${safeText(farm.Address)}</p>
+                            <p><strong>Products:</strong> ${safeText(farm.Products)}</p>
+                        </div>
+                    `;
+                    
+                    const marker = L.marker([farm.Latitude, farm.Longitude])
+                        .addTo(map)
+                        .bindPopup(popupContent);
+                    
+                    activeMarkers.push(marker); 
+                }
+            });
+        }
+
+        // Hook up the Filter Pills for Multi-Select
+        document.querySelectorAll('.filter-pill').forEach(pill => {
+            pill.addEventListener('click', (e) => {
+                const selectedCategory = e.target.getAttribute('data-category');
+                
+                // Toggle the visual active class on the button itself
+                e.target.classList.toggle('active');
+
+                // If it's now active, add it to our array. If not, remove it.
+                if (e.target.classList.contains('active')) {
+                    activeFilters.push(selectedCategory);
+                } else {
+                    activeFilters = activeFilters.filter(filter => filter !== selectedCategory);
+                }
+
+                // Redraw the map 
+                renderMarkers();
+            });
+        });
+
         function initUserLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         const userLat = position.coords.latitude;
                         const userLng = position.coords.longitude;
-                        
-                        // Set map view to user location at zoom level 11 (~25km radius scope)
                         map.setView([userLat, userLng], 11);
-
-                        // Add a subtle blue marker for the user's location
                         L.circleMarker([userLat, userLng], {
-                            radius: 8,
-                            fillColor: '#1976d2',
-                            color: '#fff',
-                            weight: 2,
-                            opacity: 1,
-                            fillOpacity: 0.9
+                            radius: 8, fillColor: '#1976d2', color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.9
                         }).addTo(map).bindPopup("<b>You are here</b>");
                     },
-                    (error) => {
-                        console.warn("Geolocation permission denied or unavailable:", error.message);
-                    },
+                    (error) => console.warn("Geolocation denied:", error.message),
                     { timeout: 10000, maximumAge: 60000 }
                 );
             }
         }
 
-        // Hook up the manual "My Location" button in the header
-        document.getElementById('locate-btn').addEventListener('click', () => {
-            initUserLocation();
-        });
-
-        // Run startup routines
+        document.getElementById('locate-btn').addEventListener('click', initUserLocation);
         loadActiveFarms();
         initUserLocation();
     </script>
