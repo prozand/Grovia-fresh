@@ -7,7 +7,6 @@
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     
     <style>
         body {
@@ -118,34 +117,34 @@
             border-color: #2c5e3b;
         }
 
-        /* High-Definition Colorful Map Pins */
+        /* High-Definition Colorful Map Pins with Emojis */
         .custom-badge-pin { background: none; border: none; }
         .badge-marker-inner {
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 18px;
-            width: 42px;
-            height: 42px;
+            font-size: 20px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             border: 3px solid white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.35);
             transition: transform 0.2s ease-out;
         }
         .badge-marker-inner:hover {
             transform: scale(1.2);
         }
 
-        /* Specific Rich Category Color Themes */
-        .badge-eggs { background: linear-gradient(135deg, #fef08a, #eab308); color: #713f12; }
-        .badge-honey { background: linear-gradient(135deg, #fde047, #ca8a04); color: #422006; }
-        .badge-maple { background: linear-gradient(135deg, #fdba74, #c2410c); color: #fff; }
-        .badge-firewood { background: linear-gradient(135deg, #f87171, #b91c1c); color: #fff; }
-        .badge-flowers { background: linear-gradient(135deg, #f472b6, #db2777); color: #fff; }
-        .badge-veggies { background: linear-gradient(135deg, #4ade80, #15803d); color: #fff; }
-        .badge-fruits { background: linear-gradient(135deg, #fb7185, #e11d48); color: #fff; }
-        .badge-craft { background: linear-gradient(135deg, #60a5fa, #1d4ed8); color: #fff; }
-        .badge-default { background: linear-gradient(135deg, #94a3b8, #475569); color: #fff; }
+        /* Rich Colorful Gradients for Badges */
+        .badge-eggs { background: linear-gradient(135deg, #fef08a, #eab308); }
+        .badge-honey { background: linear-gradient(135deg, #fde047, #ca8a04); }
+        .badge-maple { background: linear-gradient(135deg, #fdba74, #c2410c); }
+        .badge-firewood { background: linear-gradient(135deg, #f87171, #b91c1c); }
+        .badge-flowers { background: linear-gradient(135deg, #f472b6, #db2777); }
+        .badge-veggies { background: linear-gradient(135deg, #4ade80, #15803d); }
+        .badge-fruits { background: linear-gradient(135deg, #fb7185, #e11d48); }
+        .badge-craft { background: linear-gradient(135deg, #60a5fa, #1d4ed8); }
+        .badge-default { background: linear-gradient(135deg, #94a3b8, #475569); }
 
         .leaflet-popup-content h3 { color: #2c5e3b; margin: 0 0 5px 0; }
         .leaflet-popup-content p { margin: 4px 0; color: #555; }
@@ -196,14 +195,14 @@
 
         <main class="map-wrapper">
             <div class="filter-overlay" id="filter-container">
-                <button class="filter-pill" data-category="Eggs"><i class="fa-solid fa-egg" style="color: #ca8a04;"></i> Eggs</button>
-                <button class="filter-pill" data-category="Honey"><i class="fa-solid fa-jar" style="color: #d97706;"></i> Honey</button>
-                <button class="filter-pill" data-category="Maple Syrup"><i class="fa-brands fa-canadian-maple-leaf" style="color: #c2410c;"></i> Maple Syrup</button>
-                <button class="filter-pill" data-category="Firewood"><i class="fa-solid fa-fire" style="color: #dc2626;"></i> Firewood</button>
-                <button class="filter-pill" data-category="Fresh Flowers"><i class="fa-solid fa-seedling" style="color: #db2777;"></i> Flowers</button>
-                <button class="filter-pill" data-category="Veggies"><i class="fa-solid fa-carrot" style="color: #16a34a;"></i> Veggies</button>
-                <button class="filter-pill" data-category="Fruits"><i class="fa-solid fa-apple-whole" style="color: #e11d48;"></i> Fruits</button>
-                <button class="filter-pill" data-category="Arts & Craft"><i class="fa-solid fa-palette" style="color: #2563eb;"></i> Craft</button>
+                <button class="filter-pill" data-category="Eggs">🥚 Eggs</button>
+                <button class="filter-pill" data-category="Honey">🐝 Honey</button>
+                <button class="filter-pill" data-category="Maple Syrup">🍁 Maple Syrup</button>
+                <button class="filter-pill" data-category="Firewood">🔥 Firewood</button>
+                <button class="filter-pill" data-category="Fresh Flowers">💐 Flowers</button>
+                <button class="filter-pill" data-category="Veggies">🥕 Veggies</button>
+                <button class="filter-pill" data-category="Fruits">🍎 Fruits</button>
+                <button class="filter-pill" data-category="Arts & Craft">🎨 Craft</button>
             </div>
             <div id="map"></div>
         </main>
@@ -232,16 +231,16 @@
             );
         }
 
-        // Configuration linking primary products to specific FontAwesome icons and color classes
+        // Configuration linking primary products to Unicode Emojis and rich color badge classes
         const CATEGORY_CONFIG = {
-            "Eggs": { icon: '<i class="fa-solid fa-egg"></i>', cssClass: 'badge-eggs' },
-            "Honey": { icon: '<i class="fa-solid fa-jar"></i>', cssClass: 'badge-honey' },
-            "Maple Syrup": { icon: '<i class="fa-brands fa-canadian-maple-leaf"></i>', cssClass: 'badge-maple' },
-            "Firewood": { icon: '<i class="fa-solid fa-fire"></i>', cssClass: 'badge-firewood' },
-            "Fresh Flowers": { icon: '<i class="fa-solid fa-seedling"></i>', cssClass: 'badge-flowers' },
-            "Veggies": { icon: '<i class="fa-solid fa-carrot"></i>', cssClass: 'badge-veggies' },
-            "Fruits": { icon: '<i class="fa-solid fa-apple-whole"></i>', cssClass: 'badge-fruits' },
-            "Arts & Craft": { icon: '<i class="fa-solid fa-palette"></i>', cssClass: 'badge-craft' }
+            "Eggs": { emoji: "🥚", cssClass: 'badge-eggs' },
+            "Honey": { emoji: "🐝", cssClass: 'badge-honey' },
+            "Maple Syrup": { emoji: "🍁", cssClass: 'badge-maple' },
+            "Firewood": { emoji: "🔥", cssClass: 'badge-firewood' },
+            "Fresh Flowers": { emoji: "💐", cssClass: 'badge-flowers' },
+            "Veggies": { emoji: "🥕", cssClass: 'badge-veggies' },
+            "Fruits": { emoji: "🍎", cssClass: 'badge-fruits' },
+            "Arts & Craft": { emoji: "🎨", cssClass: 'badge-craft' }
         };
 
         let allFarms = [];
@@ -280,20 +279,20 @@
                         if (!matchesAllFilters) return; 
                     }
 
-                    // Look up primary product configuration
-                    let pinIcon = '<i class="fa-solid fa-leaf"></i>';
+                    // Look up primary product configuration for unicode emojis
+                    let pinEmoji = "🌱";
                     let pinClass = 'badge-default';
 
                     if (farm.Primary_Product && CATEGORY_CONFIG[farm.Primary_Product]) {
-                        pinIcon = CATEGORY_CONFIG[farm.Primary_Product].icon;
+                        pinEmoji = CATEGORY_CONFIG[farm.Primary_Product].emoji;
                         pinClass = CATEGORY_CONFIG[farm.Primary_Product].cssClass;
                     }
 
                     const customIcon = L.divIcon({
                         className: 'custom-badge-pin',
-                        html: `<div class="badge-marker-inner ${pinClass}">${pinIcon}</div>`,
-                        iconSize: [42, 42],
-                        iconAnchor: [21, 21],
+                        html: `<div class="badge-marker-inner ${pinClass}">${pinEmoji}</div>`,
+                        iconSize: [44, 44],
+                        iconAnchor: [22, 22],
                         popupAnchor: [0, -18]
                     });
 
