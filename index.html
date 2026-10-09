@@ -47,7 +47,7 @@
         }
 
         .sidebar {
-            width: 10%;
+            width: 10%OF;
             min-width: 220px;
             background-color: #f4f7f6;
             padding: 15px;
@@ -250,34 +250,54 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <script>
-        // --- DUAL VISITOR COUNTERS FETCH ---
-        async function fetchVisitorCounters() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const monthlyNamespace = `grovia-${year}-${month}`;
+        const SUPABASE_URL = 'https://xlftvjrhzklunsbaxcur.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
+        const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            // Fetch All-Time Visits
+        // --- SUPABASE VISITOR COUNTERS LOGIC ---
+        async function trackAndDisplayVisitors() {
             try {
-                const totalRes = await fetch('https://api.counterapi.dev/v1/grovia/visits/up');
-                const totalData = await totalRes.json();
-                document.getElementById('total-count').textContent = totalData.count.toLocaleString();
-            } catch (err) {
-                console.error("Total counter error:", err);
-                document.getElementById('total-count').textContent = "1,000+";
-            }
+                const now = new Date();
+                const monthKey = `${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, '0')}`; // e.g., "2026_10"
+                const keys = ['all_time', monthKey];
 
-            // Fetch Monthly Visits
-            try {
-                const monthlyRes = await fetch(`https://api.counterapi.dev/v1/grovia-${monthlyNamespace}/visits/up`);
-                const monthlyData = await monthlyRes.json();
-                document.getElementById('monthly-count').textContent = monthlyData.count.toLocaleString();
+                for (const key of keys) {
+                    // Fetch current count
+                    let { data, error } = await dbClient
+                        .from('site_counters')
+                        .select('count')
+                        .eq('key', key)
+                        .single();
+
+                    let newCount = 1;
+                    if (data) {
+                        newCount = data.count + 1;
+                        // Update with incremented count
+                        await dbClient
+                            .from('site_counters')
+                            .update({ count: newCount })
+                            .eq('key', key);
+                    } else {
+                        // Insert if key doesn't exist yet (e.g., new month transition)
+                        await dbClient
+                            .from('site_counters')
+                            .insert([{ key: key, count: 1 }]);
+                    }
+
+                    // Update UI elements
+                    if (key === 'all_time') {
+                        document.getElementById('total-count').textContent = newCount.toLocaleString();
+                    } else {
+                        document.getElementById('monthly-count').textContent = newCount.toLocaleString();
+                    }
+                }
             } catch (err) {
-                console.error("Monthly counter error:", err);
-                document.getElementById('monthly-count').textContent = "100+";
+                console.error("Supabase visitor counter error:", err);
+                document.getElementById('total-count').textContent = "1+";
+                document.getElementById('monthly-count').textContent = "1+";
             }
         }
-        fetchVisitorCounters();
+        trackAndDisplayVisitors();
 
         const map = L.map('map', { zoomControl: false }).setView([44.05, -79.85], 10);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -286,10 +306,6 @@
             maxZoom: 19,
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
-
-        const SUPABASE_URL = 'https://xlftvjrhzklunsbaxcur.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
-        const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         function safeText(str) {
             return String(str || '').replace(/[&<>'"]/g, 
