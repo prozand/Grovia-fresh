@@ -146,6 +146,8 @@
         .badge-craft { background: linear-gradient(135deg, #60a5fa, #1d4ed8); }
         .badge-beef { background: linear-gradient(135deg, #fca5a5, #991b1b); }
         .badge-chicken { background: linear-gradient(135deg, #fed7aa, #c2410c); }
+        .badge-trees { background: linear-gradient(135deg, #86efac, #166534); }
+        .badge-antiques { background: linear-gradient(135deg, #d4d4d4, #525252); }
         .badge-default { background: linear-gradient(135deg, #94a3b8, #475569); }
 
         .leaflet-popup-content h3 { color: #2c5e3b; margin: 0 0 5px 0; }
@@ -207,6 +209,8 @@
                 <button class="filter-pill" data-category="Arts & Craft">🎨 Craft</button>
                 <button class="filter-pill" data-category="Beef">🥩 Beef</button>
                 <button class="filter-pill" data-category="Chicken">🍗 Chicken</button>
+                <button class="filter-pill" data-category="Christmas Trees">🎄 Trees</button>
+                <button class="filter-pill" data-category="Antiques">🪑 Antiques</button>
             </div>
             <div id="map"></div>
         </main>
@@ -245,7 +249,9 @@
             "Fruits": { emoji: "🍎", cssClass: 'badge-fruits' },
             "Arts & Craft": { emoji: "🎨", cssClass: 'badge-craft' },
             "Beef": { emoji: "🥩", cssClass: 'badge-beef' },
-            "Chicken": { emoji: "🍗", cssClass: 'badge-chicken' }
+            "Chicken": { emoji: "🍗", cssClass: 'badge-chicken' },
+            "Christmas Trees": { emoji: "🎄", cssClass: 'badge-trees' },
+            "Antiques": { emoji: "🪑", cssClass: 'badge-antiques' }
         };
 
         let allFarms = [];
