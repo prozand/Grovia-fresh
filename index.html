@@ -7,8 +7,6 @@
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Font Awesome for Professional Vector Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     
     <style>
         body {
@@ -108,28 +106,23 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.15);
             transition: all 0.2s ease;
             user-select: none; 
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
-        .filter-pill i { font-size: 14px; }
         .filter-pill:hover { background-color: #e8f5e9; }
         .filter-pill.active {
             background-color: #2c5e3b;
             color: white;
         }
 
-        /* Custom Vector Map Pin Marker Styles */
-        .custom-vector-pin {
+        /* Custom Emoji Map Pin Marker Styles */
+        .custom-emoji-pin {
             background: none;
             border: none;
         }
-        .icon-marker-inner {
+        .emoji-marker-inner {
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 18px; /* Perfectly sized for vectors */
-            color: #2c5e3b; /* Matches your Grovia green theme */
+            font-size: 24px;
             background-color: white;
             border: 2px solid #2c5e3b;
             border-radius: 50%;
@@ -138,10 +131,8 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             transition: transform 0.15s ease-out;
         }
-        .icon-marker-inner:hover {
+        .emoji-marker-inner:hover {
             transform: scale(1.15);
-            background-color: #2c5e3b;
-            color: white;
         }
 
         .leaflet-popup-content h3 { color: #2c5e3b; margin: 0 0 5px 0; }
@@ -192,16 +183,16 @@
         </aside>
 
         <main class="map-wrapper">
-            <!-- Filter Pills with Font Awesome Icons -->
+            <!-- Filter Pills Overlay -->
             <div class="filter-overlay" id="filter-container">
-                <button class="filter-pill" data-category="Eggs"><i class="fa-solid fa-egg"></i> Eggs</button>
-                <button class="filter-pill" data-category="Honey"><i class="fa-solid fa-jar"></i> Honey</button>
-                <button class="filter-pill" data-category="Maple Syrup"><i class="fa-brands fa-canadian-maple-leaf"></i> Maple Syrup</button>
-                <button class="filter-pill" data-category="Firewood"><i class="fa-solid fa-fire"></i> Firewood</button>
-                <button class="filter-pill" data-category="Fresh Flowers"><i class="fa-solid fa-seedling"></i> Flowers</button>
-                <button class="filter-pill" data-category="Veggies"><i class="fa-solid fa-carrot"></i> Veggies</button>
-                <button class="filter-pill" data-category="Fruits"><i class="fa-solid fa-apple-whole"></i> Fruits</button>
-                <button class="filter-pill" data-category="Arts & Craft"><i class="fa-solid fa-palette"></i> Craft</button>
+                <button class="filter-pill" data-category="Eggs">🥚 Eggs</button>
+                <button class="filter-pill" data-category="Honey">🐝 Honey</button>
+                <button class="filter-pill" data-category="Maple Syrup">🍁 Maple Syrup</button>
+                <button class="filter-pill" data-category="Firewood">🔥 Firewood</button>
+                <button class="filter-pill" data-category="Fresh Flowers">💐 Flowers</button>
+                <button class="filter-pill" data-category="Veggies">🥕 Veggies</button>
+                <button class="filter-pill" data-category="Fruits">🍎 Fruits</button>
+                <button class="filter-pill" data-category="Arts & Craft">🎨 Craft</button>
             </div>
             <div id="map"></div>
         </main>
@@ -230,16 +221,15 @@
             );
         }
 
-        // Configuration Map connecting text labels to specific Font Awesome tags
-        const CATEGORY_ICONS = {
-            "Eggs": '<i class="fa-solid fa-egg"></i>',
-            "Honey": '<i class="fa-solid fa-jar"></i>',
-            "Maple Syrup": '<i class="fa-brands fa-canadian-maple-leaf"></i>',
-            "Firewood": '<i class="fa-solid fa-fire"></i>',
-            "Fresh Flowers": '<i class="fa-solid fa-seedling"></i>',
-            "Veggies": '<i class="fa-solid fa-carrot"></i>',
-            "Fruits": '<i class="fa-solid fa-apple-whole"></i>',
-            "Arts & Craft": '<i class="fa-solid fa-palette"></i>'
+        const CATEGORY_EMOJIS = {
+            "Eggs": "🥚",
+            "Honey": "🐝",
+            "Maple Syrup": "🍁",
+            "Firewood": "🔥",
+            "Fresh Flowers": "💐",
+            "Veggies": "🥕",
+            "Fruits": "🍎",
+            "Arts & Craft": "🎨"
         };
 
         let allFarms = [];
@@ -278,15 +268,15 @@
                         if (!matchesAllFilters) return; 
                     }
 
-                    // Look directly at the Primary_Product column to inject the vector icon
-                    let pinIcon = '<i class="fa-solid fa-leaf"></i>'; // Fallback icon
-                    if (farm.Primary_Product && CATEGORY_ICONS[farm.Primary_Product]) {
-                        pinIcon = CATEGORY_ICONS[farm.Primary_Product];
+                    // Look directly at the new Primary_Product column to decide the pin
+                    let pinEmoji = "🌱"; // Fallback icon
+                    if (farm.Primary_Product && CATEGORY_EMOJIS[farm.Primary_Product]) {
+                        pinEmoji = CATEGORY_EMOJIS[farm.Primary_Product];
                     }
 
                     const customIcon = L.divIcon({
-                        className: 'custom-vector-pin',
-                        html: `<div class="icon-marker-inner">${pinIcon}</div>`,
+                        className: 'custom-emoji-pin',
+                        html: `<div class="emoji-marker-inner">${pinEmoji}</div>`,
                         iconSize: [38, 38],
                         iconAnchor: [19, 19],
                         popupAnchor: [0, -15]
@@ -299,3 +289,52 @@
                             <p><strong>Products:</strong> ${safeText(farm.Products)}</p>
                         </div>
                     `;
+                    
+                    const marker = L.marker([farm.Latitude, farm.Longitude], { icon: customIcon })
+                        .addTo(map)
+                        .bindPopup(popupContent);
+                    
+                    activeMarkers.push(marker); 
+                }
+            });
+        }
+
+        document.querySelectorAll('.filter-pill').forEach(pill => {
+            pill.addEventListener('click', (e) => {
+                const selectedCategory = e.currentTarget.getAttribute('data-category');
+                
+                e.currentTarget.classList.toggle('active');
+
+                if (e.currentTarget.classList.contains('active')) {
+                    activeFilters.push(selectedCategory);
+                } else {
+                    activeFilters = activeFilters.filter(filter => filter !== selectedCategory);
+                }
+
+                renderMarkers();
+            });
+        });
+
+        function initUserLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const userLat = position.coords.latitude;
+                        const userLng = position.coords.longitude;
+                        map.setView([userLat, userLng], 11);
+                        L.circleMarker([userLat, userLng], {
+                            radius: 8, fillColor: '#1976d2', color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.9
+                        }).addTo(map).bindPopup("<b>You are here</b>");
+                    },
+                    (error) => console.warn("Geolocation denied:", error.message),
+                    { timeout: 10000, maximumAge: 60000 }
+                );
+            }
+        }
+
+        document.getElementById('locate-btn').addEventListener('click', initUserLocation);
+        loadActiveFarms();
+        initUserLocation();
+    </script>
+</body>
+</html>
