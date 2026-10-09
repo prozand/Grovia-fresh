@@ -13,10 +13,16 @@
         label { display: block; margin-top: 15px; font-weight: bold; color: #333; }
         input[type="text"] { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
         
-        /* New Checkbox Grid Styles */
-        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; background: #f4f7f6; padding: 15px; border-radius: 6px; border: 1px solid #e0e0e0; }
-        .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 15px; cursor: pointer; font-weight: normal; margin-top: 0; }
-        .checkbox-item input { width: 18px; height: 18px; cursor: pointer; margin: 0; }
+        /* Enhanced Product List Styles */
+        .product-list { margin-top: 10px; background: #f4f7f6; padding: 15px; border-radius: 6px; border: 1px solid #e0e0e0; display: flex; flex-direction: column; gap: 8px; }
+        .product-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #e0e0e0; }
+        .product-row:last-child { border-bottom: none; }
+        .product-name { font-size: 16px; font-weight: bold; color: #2c5e3b; width: 40%; }
+        .checkbox-group { display: flex; gap: 20px; width: 60%; justify-content: flex-end; }
+        
+        .cb-label { display: flex; align-items: center; gap: 6px; font-weight: normal; margin-top: 0; cursor: pointer; font-size: 14px; }
+        .cb-label input { width: 18px; height: 18px; cursor: pointer; margin: 0; }
+        .primary-label { color: #e65100; font-weight: bold; transition: opacity 0.2s; }
 
         button { background: #2c5e3b; color: white; border: none; padding: 14px 20px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 25px; width: 100%; }
         button:hover { background: #1a3c26; }
@@ -40,16 +46,74 @@
             <label>Full Address (Street, Town, Postal Code)</label>
             <input type="text" id="address" placeholder="e.g., 6098 Line 4, New Tecumseth, ON L9R 1V4" required>
 
-            <label>Products Sold (Select all that apply)</label>
-            <div class="checkbox-grid">
-                <label class="checkbox-item"><input type="checkbox" name="product" value="Eggs"> Eggs</label>
-                <label class="checkbox-item"><input type="checkbox" name="product" value="Honey"> Honey</label>
-                <label class="checkbox-item"><input type="checkbox" name="product" value="Maple Syrup"> Maple Syrup</label>
-                <label class="checkbox-item"><input type="checkbox" name="product" value="Firewood"> Firewood</label>
-                <label class="checkbox-item"><input type="checkbox" name="product" value="Fresh Flowers"> Fresh Flowers</label>
-                <label class="checkbox-item"><input type="checkbox" name="product" value="Veggies"> Veggies</label>
-                <label class="checkbox-item"><input type="checkbox" name="product" value="Fruits"> Fruits</label>
-                <label class="checkbox-item"><input type="checkbox" name="product" value="Arts & Craft"> Arts & Craft</label>
+            <label>Products Sold</label>
+            <p style="font-size: 13px; margin-top: 0; margin-bottom: 10px;">Check <strong>Sell</strong> for everything you offer. Check exactly one <strong>Primary</strong> product to serve as your map icon.</p>
+            
+            <div class="product-list">
+                <!-- Eggs -->
+                <div class="product-row">
+                    <div class="product-name">🥚 Eggs</div>
+                    <div class="checkbox-group">
+                        <label class="cb-label"><input type="checkbox" name="product" value="Eggs" class="sell-cb"> Sell</label>
+                        <label class="cb-label primary-label"><input type="checkbox" name="primary" value="Eggs" class="primary-cb"> Primary</label>
+                    </div>
+                </div>
+                <!-- Honey -->
+                <div class="product-row">
+                    <div class="product-name">🐝 Honey</div>
+                    <div class="checkbox-group">
+                        <label class="cb-label"><input type="checkbox" name="product" value="Honey" class="sell-cb"> Sell</label>
+                        <label class="cb-label primary-label"><input type="checkbox" name="primary" value="Honey" class="primary-cb"> Primary</label>
+                    </div>
+                </div>
+                <!-- Maple Syrup -->
+                <div class="product-row">
+                    <div class="product-name">🍁 Maple Syrup</div>
+                    <div class="checkbox-group">
+                        <label class="cb-label"><input type="checkbox" name="product" value="Maple Syrup" class="sell-cb"> Sell</label>
+                        <label class="cb-label primary-label"><input type="checkbox" name="primary" value="Maple Syrup" class="primary-cb"> Primary</label>
+                    </div>
+                </div>
+                <!-- Firewood -->
+                <div class="product-row">
+                    <div class="product-name">🔥 Firewood</div>
+                    <div class="checkbox-group">
+                        <label class="cb-label"><input type="checkbox" name="product" value="Firewood" class="sell-cb"> Sell</label>
+                        <label class="cb-label primary-label"><input type="checkbox" name="primary" value="Firewood" class="primary-cb"> Primary</label>
+                    </div>
+                </div>
+                <!-- Fresh Flowers -->
+                <div class="product-row">
+                    <div class="product-name">💐 Flowers</div>
+                    <div class="checkbox-group">
+                        <label class="cb-label"><input type="checkbox" name="product" value="Fresh Flowers" class="sell-cb"> Sell</label>
+                        <label class="cb-label primary-label"><input type="checkbox" name="primary" value="Fresh Flowers" class="primary-cb"> Primary</label>
+                    </div>
+                </div>
+                <!-- Veggies -->
+                <div class="product-row">
+                    <div class="product-name">🥕 Veggies</div>
+                    <div class="checkbox-group">
+                        <label class="cb-label"><input type="checkbox" name="product" value="Veggies" class="sell-cb"> Sell</label>
+                        <label class="cb-label primary-label"><input type="checkbox" name="primary" value="Veggies" class="primary-cb"> Primary</label>
+                    </div>
+                </div>
+                <!-- Fruits -->
+                <div class="product-row">
+                    <div class="product-name">🍎 Fruits</div>
+                    <div class="checkbox-group">
+                        <label class="cb-label"><input type="checkbox" name="product" value="Fruits" class="sell-cb"> Sell</label>
+                        <label class="cb-label primary-label"><input type="checkbox" name="primary" value="Fruits" class="primary-cb"> Primary</label>
+                    </div>
+                </div>
+                <!-- Arts & Craft -->
+                <div class="product-row">
+                    <div class="product-name">🎨 Arts & Craft</div>
+                    <div class="checkbox-group">
+                        <label class="cb-label"><input type="checkbox" name="product" value="Arts & Craft" class="sell-cb"> Sell</label>
+                        <label class="cb-label primary-label"><input type="checkbox" name="primary" value="Arts & Craft" class="primary-cb"> Primary</label>
+                    </div>
+                </div>
             </div>
 
             <button type="submit" id="submit-btn">Proceed to Secure Checkout ($25)</button>
@@ -63,9 +127,35 @@
         const SUPABASE_URL = 'https://xlftvjrhzklunsbaxcur.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
         const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
         const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/test_cNieVceLYefL4ZvduzeIw00';
 
+        // --- INTERACTIVE CHECKBOX LOGIC ---
+        document.querySelectorAll('.primary-cb').forEach(primaryCb => {
+            primaryCb.addEventListener('change', function() {
+                const allPrimary = document.querySelectorAll('.primary-cb');
+                
+                if (this.checked) {
+                    // Automatically check the "Sell" box next to it
+                    this.closest('.product-row').querySelector('.sell-cb').checked = true;
+                    
+                    // Disable and grey out all other Primary boxes
+                    allPrimary.forEach(cb => {
+                        if (cb !== this) {
+                            cb.disabled = true;
+                            cb.closest('.primary-label').style.opacity = '0.3';
+                        }
+                    });
+                } else {
+                    // Restore all Primary boxes if unchecked
+                    allPrimary.forEach(cb => {
+                        cb.disabled = false;
+                        cb.closest('.primary-label').style.opacity = '1';
+                    });
+                }
+            });
+        });
+
+        // --- FORM SUBMISSION ---
         document.getElementById('farm-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const statusDiv = document.getElementById('status');
@@ -74,16 +164,18 @@
             const title = document.getElementById('title').value;
             const address = document.getElementById('address').value;
             
-            // Gather all checked boxes and convert to a comma-separated string
-            const checkedBoxes = document.querySelectorAll('input[name="product"]:checked');
-            const products = Array.from(checkedBoxes).map(cb => cb.value).join(', ');
-
-            // Ensure at least one product is selected
-            if (!products) {
+            // Validate Primary Product
+            const checkedPrimary = document.querySelector('.primary-cb:checked');
+            if (!checkedPrimary) {
                 statusDiv.style.color = 'red';
-                statusDiv.innerHTML = "❌ Please select at least one product category.";
+                statusDiv.innerHTML = "❌ Please select exactly one Primary product for your map icon.";
                 return;
             }
+            const primaryProduct = checkedPrimary.value;
+
+            // Gather all checked "Sell" boxes
+            const checkedSellBoxes = document.querySelectorAll('.sell-cb:checked');
+            const products = Array.from(checkedSellBoxes).map(cb => cb.value).join(', ');
 
             statusDiv.style.color = '#333';
             statusDiv.innerHTML = "📍 Translating address to GPS coordinates...";
@@ -102,11 +194,13 @@
 
                 statusDiv.innerHTML = `✅ Coordinates found. Saving to database...`;
 
+                // Push both the comma-separated list AND the specific primary choice
                 const { data, error } = await dbClient.from('farms').insert([
                     {
                         title: title,
                         Address: address,
                         Products: products,
+                        Primary_Product: primaryProduct,
                         Latitude: latitude,
                         Longitude: longitude,
                         Active: false
@@ -117,7 +211,6 @@
 
                 const farmId = data[0].id;
                 statusDiv.innerHTML = `🚀 Redirecting to Stripe checkout...`;
-
                 const finalStripeUrl = `${STRIPE_PAYMENT_LINK}?client_reference_id=${farmId}`;
 
                 setTimeout(() => {
