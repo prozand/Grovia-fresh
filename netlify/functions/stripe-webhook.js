@@ -1,7 +1,6 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { createClient } = require('@supabase/supabase-js');
 
-// Initialize Supabase with your service role key to securely bypass RLS
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -14,7 +13,6 @@ exports.handler = async (event, context) => {
   let stripeEvent;
 
   try {
-    // Securely verify that the event came from Stripe
     stripeEvent = stripe.webhooks.constructEvent(event.body, sig, webhookSecret);
   } catch (err) {
     console.error(`Webhook signature verification failed: ${err.message}`);
@@ -24,31 +22,46 @@ exports.handler = async (event, context) => {
     };
   }
 
-  // Listen for a completed checkout session
+  // Listen for completed checkout sessions (works for both payments and subscriptions)
   if (stripeEvent.type === 'checkout.session.completed') {
     const session = stripeEvent.data.object;
-    const customerEmail = session.customer_details?.email;
+    
+    const customerEmail = session.customer_details?.email || session.customer_email;
+    const clientRefId = session.client_reference_id;
 
-    console.log(`Checkout completed successfully for: ${customerEmail}`);
+    console.log(`Webhook received! Email: ${customerEmail}, Client Ref ID: ${clientRefId}`);
 
-    if (customerEmail) {
-      // Update the farm listing in Supabase to active
+    let updateError = null;
+
+    // Option A: If we have a client_reference_id (like row ID 106), update by ID!
+    if (clientRefId) {
+      const { error } = await supabase
+        .from('farms')
+        .update({ Active: true })
+        .eq('id', clientRefId);
+
+      updateError = error;
+    } 
+    // Option B: Fallback to updating by email if no client reference ID exists
+    else if (customerEmail) {
       const { error } = await supabase
         .from('farms')
         .update({ Active: true })
         .eq('Email', customerEmail);
 
-      if (error) {
-        console.error('Supabase update error:', error);
-        return {
-          statusCode: 500,
-          body: JSON.stringify({ error: error.message }),
-        };
-      }
-
-      console.log(`Successfully set Active = true for ${customerEmail}`);
+      updateError = error;
     } else {
-      console.warn('Checkout completed, but no customer email was provided.');
+      console.warn('Checkout completed, but neither client_reference_id nor email was found.');
+    }
+
+    if (updateError) {
+      console.error('Supabase update error:', updateError);
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: updateError.message }),
+      };
+    } else {
+      console.log('Successfully set Active = true in Supabase!');
     }
   }
 
