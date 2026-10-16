@@ -272,7 +272,7 @@
     <footer class="bottom-ad-zone">
         <div class="footer-ads-viewport">
             <div id="footer-ads-track" class="footer-ads-track">
-                <!-- Dynamically populated and duplicated from Supabase advertisers table -->
+                <!-- Dynamically populated from Supabase advertisers table -->
             </div>
         </div>
 
@@ -290,7 +290,7 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
         const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // --- FETCH, DUPLICATE & RENDER ADVERTISERS (BLANK LINK IF NO URL) ---
+        // --- FETCH, RENDER ADVERTISERS & PERMANENT PROMO SLOT ---
         async function loadAdvertisers() {
             const track = document.getElementById('footer-ads-track');
             try {
@@ -302,11 +302,10 @@
                 if (error) throw error;
 
                 let cardsHtml = '';
-                let count = 0;
 
+                // 1. Render active advertisers from Supabase
                 if (ads && ads.length > 0) {
                     ads.forEach(ad => {
-                        count++;
                         const logoHtml = ad.image_url ? `<img src="${safeText(ad.image_url)}" alt="Logo">` : '📢';
                         
                         let details = [];
@@ -314,7 +313,6 @@
                         if (ad.phone) details.push(`📞 ${safeText(ad.phone)}`);
                         const detailsText = details.length > 0 ? ` — ${details.join(' | ')}` : '';
 
-                        // If no target_url is provided, do not render a link button
                         let actionHtml = '';
                         if (ad.target_url && ad.target_url.trim() !== '') {
                             actionHtml = `<a href="${safeText(ad.target_url)}" target="_blank" rel="noopener" class="btn-secondary" style="background-color: #e65100;">Visit Site</a>`;
@@ -330,24 +328,22 @@
                     });
                 }
 
-                // Fill placeholders if fewer than 3 ads exist
-                for (let i = count; i < 3; i++) {
-                    cardsHtml += `
-                        <div class="footer-ad-card">
-                            <span>📢 <strong>Advertise Here!</strong> Feature your business.</span>
-                            <a href="advertise.html" class="btn-secondary">Contact Us</a>
-                        </div>
-                    `;
-                }
+                // 2. Always include the permanent "Show your business here" promotional slot in the scroll
+                cardsHtml += `
+                    <div class="footer-ad-card">
+                        <span>📢 <strong>Show your business here</strong> — Reach local customers.</span>
+                        <a href="advertise.html" class="btn-secondary">Contact Us</a>
+                    </div>
+                `;
 
-                // Triple duplicate for smooth mobile marquee loop
+                // Triple duplicate the entire track content for seamless mobile marquee infinite loop
                 track.innerHTML = cardsHtml + cardsHtml + cardsHtml;
 
             } catch (err) {
                 console.error("Error loading advertisers:", err);
                 const fallbackHtml = `
                     <div class="footer-ad-card">
-                        <span>📢 <strong>Advertise Here!</strong> Feature your business.</span>
+                        <span>📢 <strong>Show your business here</strong> — Reach local customers.</span>
                         <a href="advertise.html" class="btn-secondary">Contact Us</a>
                     </div>
                 `;
