@@ -37,6 +37,7 @@
 
         .map-wrapper {
             flex-grow: 1;
+            min-height: 0; /* Fixes map collapse issue with flexbox and vh siblings */
             position: relative;
         }
         #map { width: 100%; height: 100%; }
@@ -278,4 +279,230 @@
                 let { data: ads, error } = await dbClient
                     .from('advertisers')
                     .select('*')
-                    .eq('active', true
+                    .eq('active', true)
+                    .limit(3);
+
+                if (error) throw error;
+
+                let html = '';
+                let count = 0;
+
+                if (ads && ads.length > 0) {
+                    ads.forEach(ad => {
+                        count++;
+                        const logoHtml = ad.image_url ? `<img src="${safeText(ad.image_url)}" alt="Logo">` : '📢';
+                        
+                        let details = [];
+                        if (ad.tagline) details.push(safeText(ad.tagline));
+                        if (ad.phone) details.push(`📞 ${safeText(ad.phone)}`);
+                        const detailsText = details.length > 0 ? ` — ${details.join(' | ')}` : '';
+
+                        const targetUrl = ad.target_url ? safeText(ad.target_url) : 'advertise.html';
+                        const btnText = ad.target_url ? 'Visit Site' : 'Contact Us';
+                        const btnStyle = ad.target_url ? 'background-color: #e65100;' : '';
+
+                        html += `
+                            <div class="footer-ad-card sponsor">
+                                ${logoHtml}
+                                <span><strong>${safeText(ad.business_name)}</strong>${detailsText}</span>
+                                <a href="${targetUrl}" target="_blank" rel="noopener" class="btn-secondary" style="${btnStyle}">${btnText}</a>
+                            </div>
+                        `;
+                    });
+                }
+
+                // Fill remaining slots up to 3 with placeholders if needed
+                for (let i = count; i < 3; i++) {
+                    html += `
+                        <div class="footer-ad-card">
+                            <span>📢 <strong>Advertise Here!</strong> Feature your business.</span>
+                            <a href="advertise.html" class="btn-secondary">Contact Us</a>
+                        </div>
+                    `;
+                }
+
+                container.innerHTML = html;
+            } catch (err) {
+                console.error("Error loading advertisers:", err);
+                container.innerHTML = `
+                    <div class="footer-ad-card">
+                        <span>📢 <strong>Advertise Here!</strong> Feature your business.</span>
+                        <a href="advertise.html" class="btn-secondary">Contact Us</a>
+                    </div>
+                `;
+            }
+        }
+        loadAdvertisers();
+
+        async function trackAndDisplayVisitors() {
+            try {
+                const now = new Date();
+                const monthKey = `${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, '0')}`;
+                const keys = ['all_time', monthKey];
+
+                for (const key of keys) {
+                    let { data, error } = await dbClient
+                        .from('site_counters')
+                        .select('count')
+                        .eq('key', key)
+                        .single();
+
+                    let newCount = 1;
+                    if (data) {
+                        newCount = data.count + 1;
+                        await dbClient
+                            .from('site_counters')
+                            .update({ count: newCount })
+                            .eq('key', key);
+                    } else {
+                        await dbClient
+                            .from('site_counters')
+                            .insert([{ key: key, count: 1 }]);
+                    }
+
+                    if (key === 'all_time') {
+                        document.getElementById('total-count').textContent = newCount.toLocaleString();
+                    } else {
+                        document.getElementById('monthly-count').textContent = newCount.toLocaleString();
+                    }
+                }
+            } catch (err) {
+                console.error("Supabase visitor counter error:", err);
+                document.getElementById('total-count').textContent = "1+";
+                document.getElementById('monthly-count').textContent = "1+";
+            }
+        }
+        trackAndDisplayVisitors();
+
+        const map = L.map('map', { zoomControl: false }).setView([44.05, -79.85], 10);
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+                    map.setView([userLat, userLng], 11);
+                },
+                (error) => {
+                    console.log("Geolocation permission denied or unavailable. Using default view.");
+                },
+                { timeout: 10000 }
+            );
+        }
+
+        function safeText(str) {
+            return String(str || '').replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        const CATEGORY_CONFIG = {
+            "Eggs": { emoji: "🥚", cssClass: 'badge-eggs' },
+            "Honey": { emoji: "🐝", cssClass: 'badge-honey' },
+            "Maple Syrup": { emoji: "🍁", cssClass: 'badge-maple' },
+            "Firewood": { emoji: "🔥", cssClass: 'badge-firewood' },
+            "Fresh Flowers": { emoji: "💐", cssClass: 'badge-flowers' },
+            "Veggies": { emoji: "🥕", cssClass: 'badge-veggies' },
+            "Fruits": { emoji: "🍎", cssClass: 'badge-fruits' },
+            "Arts & Craft": { emoji: "🎨", cssClass: 'badge-craft' },
+            "Beef": { emoji: "🥩", cssClass: 'badge-beef' },
+            "Chicken": { emoji: "🍗", cssClass: 'badge-chicken' },
+            "Christmas Trees": { emoji: "🎄", cssClass: 'badge-trees' },
+            "Antiques": { emoji: "🪑", cssClass: 'badge-antiques' }
+        };
+
+        let allFarms = [];
+        let activeMarkers = [];
+        let activeFilters = []; 
+
+        async function loadActiveFarms() {
+            try {
+                const { data: farms, error } = await dbClient
+                    .from('farms')
+                    .select('*')
+                    .eq('Active', true);
+
+                if (error) throw error;
+
+                if (farms && farms.length > 0) {
+                    allFarms = farms; 
+                    renderMarkers();  
+                }
+            } catch (err) {
+                console.error("Error loading active farms:", err);
+            }
+        }
+
+        function renderMarkers() {
+            activeMarkers.forEach(marker => map.removeLayer(marker));
+            activeMarkers = [];
+
+            allFarms.forEach(farm => {
+                if (farm.Latitude && farm.Longitude) {
+                    
+                    const farmProducts = farm.Products || "";
+                    
+                    if (activeFilters.length > 0) {
+                        const matchesAllFilters = activeFilters.every(filter => farmProducts.includes(filter));
+                        if (!matchesAllFilters) return; 
+                    }
+
+                    let pinEmoji = "🌱";
+                    let pinClass = 'badge-default';
+
+                    if (farm.Primary_Product && CATEGORY_CONFIG[farm.Primary_Product]) {
+                        pinEmoji = CATEGORY_CONFIG[farm.Primary_Product].emoji;
+                        pinClass = CATEGORY_CONFIG[farm.Primary_Product].cssClass;
+                    }
+
+                    const customIcon = L.divIcon({
+                        className: 'custom-badge-pin',
+                        html: `<div class="badge-marker-inner ${pinClass}">${pinEmoji}</div>`,
+                        iconSize: [44, 44],
+                        iconAnchor: [22, 22],
+                        popupAnchor: [0, -18]
+                    });
+
+                    const popupContent = `
+                        <div>
+                            <h3>${safeText(farm.title)}</h3>
+                            <p><strong>Address:</strong> ${safeText(farm.Address)}</p>
+                            <p><strong>Products:</strong> ${safeText(farm.Products)}</p>
+                        </div>
+                    `;
+                    
+                    const marker = L.marker([farm.Latitude, farm.Longitude], { icon: customIcon })
+                        .addTo(map)
+                        .bindPopup(popupContent);
+                    
+                    activeMarkers.push(marker); 
+                }
+            });
+        }
+
+        document.querySelectorAll('.filter-pill').forEach(pill => {
+            pill.addEventListener('click', (e) => {
+                const selectedCategory = e.currentTarget.getAttribute('data-category');
+                
+                e.currentTarget.classList.toggle('active');
+
+                if (e.currentTarget.classList.contains('active')) {
+                    activeFilters.push(selectedCategory);
+                } else {
+                    activeFilters = activeFilters.filter(filter => filter !== selectedCategory);
+                }
+
+                renderMarkers();
+            });
+        });
+
+        loadActiveFarms();
+    </script>
+</body>
+</html>
