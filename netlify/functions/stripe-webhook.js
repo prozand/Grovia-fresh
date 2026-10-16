@@ -1,4 +1,3 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
@@ -7,6 +6,14 @@ const supabase = createClient(
 );
 
 exports.handler = async (event, context) => {
+  // Initialize Stripe inside the handler using current environment variables
+  const stripeKey = process.env.STRIPE_SECRET_KEY;
+  if (!stripeKey) {
+    console.error('CRITICAL: STRIPE_SECRET_KEY is missing from Netlify environment variables!');
+    return { statusCode: 500, body: 'Server configuration error: Stripe key missing.' };
+  }
+  const stripe = require('stripe')(stripeKey);
+
   const sig = event.headers['stripe-signature'];
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -22,46 +29,26 @@ exports.handler = async (event, context) => {
     };
   }
 
-  // Listen for completed checkout sessions (works for both payments and subscriptions)
   if (stripeEvent.type === 'checkout.session.completed') {
     const session = stripeEvent.data.object;
-    
-    const customerEmail = session.customer_details?.email || session.customer_email;
     const clientRefId = session.client_reference_id;
+    const customerEmail = session.customer_details?.email || session.customer_email;
 
-    console.log(`Webhook received! Email: ${customerEmail}, Client Ref ID: ${clientRefId}`);
+    console.log(`Webhook received! Client Ref ID: ${clientRefId}, Email: ${customerEmail}`);
 
-    let updateError = null;
-
-    // Option A: If we have a client_reference_id (like row ID 106), update by ID!
     if (clientRefId) {
       const { error } = await supabase
         .from('farms')
         .update({ Active: true })
         .eq('id', clientRefId);
 
-      updateError = error;
-    } 
-    // Option B: Fallback to updating by email if no client reference ID exists
-    else if (customerEmail) {
-      const { error } = await supabase
-        .from('farms')
-        .update({ Active: true })
-        .eq('Email', customerEmail);
-
-      updateError = error;
+      if (error) {
+        console.error('Supabase update error:', error);
+        return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
+      }
+      console.log(`Successfully set Active = true for farm ID ${clientRefId}`);
     } else {
-      console.warn('Checkout completed, but neither client_reference_id nor email was found.');
-    }
-
-    if (updateError) {
-      console.error('Supabase update error:', updateError);
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: updateError.message }),
-      };
-    } else {
-      console.log('Successfully set Active = true in Supabase!');
+      console.warn('No client_reference_id found on session.');
     }
   }
 
