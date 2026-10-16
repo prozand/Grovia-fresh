@@ -52,7 +52,7 @@
             margin-bottom: 6px;
             font-size: 14px;
         }
-        input[type="text"], input[type="url"], input[type="email"] {
+        input[type="text"], input[type="url"], input[type="email"], input[type="tel"], input[type="file"] {
             width: 100%;
             padding: 10px 12px;
             border: 1px solid #ccc;
@@ -91,6 +91,7 @@
             transition: background-color 0.2s ease;
         }
         .btn:hover { background-color: #bf360c; }
+        .btn:disabled { background-color: #ccc; cursor: not-allowed; }
 
         .back-link {
             display: block;
@@ -125,7 +126,7 @@
     <div class="container">
         <form id="ad-form">
             <div class="form-group">
-                <label for="business_name">Business Name *</label>
+                <label for="business_name">Advertiser / Business Name *</label>
                 <input type="text" id="business_name" required placeholder="e.g. Simcoe Farm Supply">
             </div>
 
@@ -135,18 +136,18 @@
             </div>
 
             <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" placeholder="e.g. 705-555-0199">
+            </div>
+
+            <div class="form-group">
                 <label for="target_url">Target Website URL</label>
                 <input type="url" id="target_url" placeholder="https://example.com">
             </div>
 
             <div class="form-group">
-                <label for="image_url">Logo / Image URL</label>
-                <input type="url" id="image_url" placeholder="https://example.com/logo.png">
-            </div>
-
-            <div class="form-group">
-                <label for="contact_email">Contact Email (Optional)</label>
-                <input type="email" id="contact_email" placeholder="owner@example.com">
+                <label for="logo_file">Upload Graphic / Logo</label>
+                <input type="file" id="logo_file" accept="image/*">
             </div>
 
             <div class="form-group checkbox-group">
@@ -175,33 +176,60 @@
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Saving...';
+            submitBtn.textContent = 'Uploading & Saving...';
             statusMsg.style.display = 'none';
 
-            const newAd = {
-                business_name: document.getElementById('business_name').value.trim(),
-                tagline: document.getElementById('tagline').value.trim() || null,
-                target_url: document.getElementById('target_url').value.trim() || null,
-                image_url: document.getElementById('image_url').value.trim() || null,
-                contact_email: document.getElementById('contact_email').value.trim() || null,
-                active: document.getElementById('active').checked
-            };
-
             try {
-                const { data, error } = await dbClient
+                let imageUrl = null;
+                const fileInput = document.getElementById('logo_file');
+
+                // Handle file upload to Supabase Storage if a file was selected
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `${Date.now()}_${Math.random().toString(36.substring(2, 9))}.${fileExt}`;
+                    const filePath = `${fileName}`;
+
+                    let { error: uploadError } = await dbClient.storage
+                        .from('advertiser-logos')
+                        .upload(filePath, file);
+
+                    if (uploadError) throw uploadError;
+
+                    // Get public URL of the uploaded image
+                    const { data: publicUrlData } = dbClient.storage
+                        .from('advertiser-logos')
+                        .getPublicUrl(filePath);
+
+                    imageUrl = publicUrlData.publicUrl;
+                }
+
+                // Prepare advertiser payload
+                const newAd = {
+                    business_name: document.getElementById('business_name').value.trim(),
+                    tagline: document.getElementById('tagline').value.trim() || null,
+                    phone: document.getElementById('phone').value.trim() || null,
+                    target_url: document.getElementById('target_url').value.trim() || null,
+                    image_url: imageUrl,
+                    active: document.getElementById('active').checked
+                };
+
+                // Insert into advertisers table
+                const { error: insertError } = await dbClient
                     .from('advertisers')
                     .insert([newAd]);
 
-                if (error) throw error;
+                if (insertError) throw insertError;
 
-                statusMsg.textContent = 'Advertiser successfully added and published live!';
+                statusMsg.textContent = 'Advertiser successfully uploaded and published live!';
                 statusMsg.className = 'success';
                 statusMsg.style.display = 'block';
                 form.reset();
-                document.getElementById('active').checked = true; // reset checkbox default
+                document.getElementById('active').checked = true;
+
             } catch (err) {
-                console.error("Supabase insert error:", err);
-                statusMsg.textContent = 'Error saving advertiser: ' + err.message;
+                console.error("Submission error:", err);
+                statusMsg.textContent = 'Error: ' + err.message;
                 statusMsg.className = 'error';
                 statusMsg.style.display = 'block';
             } finally {
