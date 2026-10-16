@@ -1,1 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grovia - Admin Advertiser Portal</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f6f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
 
+        header {
+            background-color: #388e3c;
+            color: white;
+            padding: 15px 25px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+        }
+        h1 { margin: 0; font-size: 22px; }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 500px;
+            margin: 40px 20px;
+            box-sizing: border-box;
+            border-top: 4px solid #e65100;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+        input[type="text"], input[type="url"], input[type="email"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #388e3c;
+            box-shadow: 0 0 5px rgba(56, 142, 60, 0.3);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .checkbox-group input {
+            width: 18px;
+            height: 18px;
+            accent-color: #388e3c;
+        }
+
+        .btn {
+            background-color: #e65100;
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            font-weight: bold;
+            border-radius: 6px;
+            font-size: 15px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s ease;
+        }
+        .btn:hover { background-color: #bf360c; }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #1976d2;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .back-link:hover { text-decoration: underline; }
+
+        #status-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: bold;
+            display: none;
+        }
+        .success { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .error { background-color: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🌱 Grovia Admin — Add Advertiser</h1>
+    </header>
+
+    <div class="container">
+        <form id="ad-form">
+            <div class="form-group">
+                <label for="business_name">Business Name *</label>
+                <input type="text" id="business_name" required placeholder="e.g. Simcoe Farm Supply">
+            </div>
+
+            <div class="form-group">
+                <label for="tagline">Tagline / Short Offer</label>
+                <input type="text" id="tagline" placeholder="e.g. Feed, seed & fencing in Alliston">
+            </div>
+
+            <div class="form-group">
+                <label for="target_url">Target Website URL</label>
+                <input type="url" id="target_url" placeholder="https://example.com">
+            </div>
+
+            <div class="form-group">
+                <label for="image_url">Logo / Image URL</label>
+                <input type="url" id="image_url" placeholder="https://example.com/logo.png">
+            </div>
+
+            <div class="form-group">
+                <label for="contact_email">Contact Email (Optional)</label>
+                <input type="email" id="contact_email" placeholder="owner@example.com">
+            </div>
+
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="active" checked>
+                <label for="active" style="margin-bottom: 0;">Publish Live Immediately</label>
+            </div>
+
+            <button type="submit" class="btn" id="submit-btn">Save Advertiser to Supabase</button>
+            
+            <div id="status-message"></div>
+        </form>
+
+        <a href="index.html" class="back-link">← Back to Grovia Map</a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://xlftvjrhzklunsbaxcur.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
+        const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const form = document.getElementById('ad-form');
+        const statusMsg = document.getElementById('status-message');
+        const submitBtn = document.getElementById('submit-btn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving...';
+            statusMsg.style.display = 'none';
+
+            const newAd = {
+                business_name: document.getElementById('business_name').value.trim(),
+                tagline: document.getElementById('tagline').value.trim() || null,
+                target_url: document.getElementById('target_url').value.trim() || null,
+                image_url: document.getElementById('image_url').value.trim() || null,
+                contact_email: document.getElementById('contact_email').value.trim() || null,
+                active: document.getElementById('active').checked
+            };
+
+            try {
+                const { data, error } = await dbClient
+                    .from('advertisers')
+                    .insert([newAd]);
+
+                if (error) throw error;
+
+                statusMsg.textContent = 'Advertiser successfully added and published live!';
+                statusMsg.className = 'success';
+                statusMsg.style.display = 'block';
+                form.reset();
+                document.getElementById('active').checked = true; // reset checkbox default
+            } catch (err) {
+                console.error("Supabase insert error:", err);
+                statusMsg.textContent = 'Error saving advertiser: ' + err.message;
+                statusMsg.className = 'error';
+                statusMsg.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Save Advertiser to Supabase';
+            }
+        });
+    </script>
+</body>
+</html>
