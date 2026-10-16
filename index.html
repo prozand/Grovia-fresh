@@ -290,7 +290,7 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
         const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // --- FETCH, DUPLICATE & RENDER ADVERTISERS FOR MOBILE-SAFE SCROLLING ---
+        // --- FETCH, DUPLICATE & RENDER ADVERTISERS (BLANK LINK IF NO URL) ---
         async function loadAdvertisers() {
             const track = document.getElementById('footer-ads-track');
             try {
@@ -314,15 +314,17 @@
                         if (ad.phone) details.push(`📞 ${safeText(ad.phone)}`);
                         const detailsText = details.length > 0 ? ` — ${details.join(' | ')}` : '';
 
-                        const targetUrl = ad.target_url ? safeText(ad.target_url) : 'advertise.html';
-                        const btnText = ad.target_url ? 'Visit Site' : 'Contact Us';
-                        const btnStyle = ad.target_url ? 'background-color: #e65100;' : '';
+                        // If no target_url is provided, do not render a link button
+                        let actionHtml = '';
+                        if (ad.target_url && ad.target_url.trim() !== '') {
+                            actionHtml = `<a href="${safeText(ad.target_url)}" target="_blank" rel="noopener" class="btn-secondary" style="background-color: #e65100;">Visit Site</a>`;
+                        }
 
                         cardsHtml += `
                             <div class="footer-ad-card sponsor">
                                 ${logoHtml}
                                 <span><strong>${safeText(ad.business_name)}</strong>${detailsText}</span>
-                                <a href="${targetUrl}" target="_blank" rel="noopener" class="btn-secondary" style="${btnStyle}">${btnText}</a>
+                                ${actionHtml}
                             </div>
                         `;
                     });
@@ -338,7 +340,7 @@
                     `;
                 }
 
-                // Duplicate the cards HTML 3 times to ensure the track is wide enough for mobile GPU rendering layers without clipping
+                // Triple duplicate for smooth mobile marquee loop
                 track.innerHTML = cardsHtml + cardsHtml + cardsHtml;
 
             } catch (err) {
