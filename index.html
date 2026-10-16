@@ -110,6 +110,16 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.03);
             flex-shrink: 0;
         }
+        .footer-ad-card.sponsor {
+            border: 2px solid #e65100;
+            background: #fffdf9;
+        }
+        .footer-ad-card img {
+            width: 32px;
+            height: 32px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
         .footer-ad-card strong { color: #2c5e3b; }
 
         .footer-stats-box {
@@ -243,19 +253,8 @@
     </main>
 
     <footer class="bottom-ad-zone">
-        <div class="footer-ads-container">
-            <div class="footer-ad-card">
-                <span>📢 <strong>Advertise Here!</strong> Feature your business.</span>
-                <a href="advertise.html" class="btn-secondary">Contact Us</a>
-            </div>
-            <div class="footer-ad-card">
-                <span>📢 <strong>Advertise Here!</strong> Feature your business.</span>
-                <a href="advertise.html" class="btn-secondary">Contact Us</a>
-            </div>
-            <div class="footer-ad-card">
-                <span>📢 <strong>Advertise Here!</strong> Feature your business.</span>
-                <a href="advertise.html" class="btn-secondary">Contact Us</a>
-            </div>
+        <div id="footer-ads-container" class="footer-ads-container">
+            <!-- Dynamically populated from Supabase advertisers table -->
         </div>
 
         <div class="footer-stats-box">
@@ -271,6 +270,63 @@
         const SUPABASE_URL = 'https://xlftvjrhzklunsbaxcur.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
         const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // --- FETCH AND RENDER ADVERTISERS ---
+        async function loadAdvertisers() {
+            const container = document.getElementById('footer-ads-container');
+            try {
+                let { data: ads, error } = await dbClient
+                    .from('advertisers')
+                    .select('*')
+                    .eq('active', true)
+                    .limit(3);
+
+                if (error) throw error;
+
+                let html = '';
+                let count = 0;
+
+                if (ads && ads.length > 0) {
+                    ads.forEach(ad => {
+                        count++;
+                        const logoHtml = ad.image_url ? `<img src="${safeText(ad.image_url)}" alt="Logo">` : '📢';
+                        const taglineText = ad.tagline ? ` — ${safeText(ad.tagline)}` : '';
+                        const targetUrl = ad.target_url ? safeText(ad.target_url) : 'advertise.html';
+                        const btnText = ad.target_url ? 'Visit Site' : 'Contact Us';
+                        const btnStyle = ad.target_url ? 'background-color: #e65100;' : '';
+
+                        html += `
+                            <div class="footer-ad-card sponsor">
+                                ${logoHtml}
+                                <span><strong>${safeText(ad.business_name)}</strong>${taglineText}</span>
+                                <a href="${targetUrl}" target="_blank" rel="noopener" class="btn-secondary" style="${btnStyle}">${btnText}</a>
+                            </div>
+                        `;
+                    });
+                }
+
+                // Fill remaining slots up to 3 with placeholders if needed
+                for (let i = count; i < 3; i++) {
+                    html += `
+                        <div class="footer-ad-card">
+                            <span>📢 <strong>Advertise Here!</strong> Feature your business.</span>
+                            <a href="advertise.html" class="btn-secondary">Contact Us</a>
+                        </div>
+                    `;
+                }
+
+                container.innerHTML = html;
+            } catch (err) {
+                console.error("Error loading advertisers:", err);
+                container.innerHTML = `
+                    <div class="footer-ad-card">
+                        <span>📢 <strong>Advertise Here!</strong> Feature your business.</span>
+                        <a href="advertise.html" class="btn-secondary">Contact Us</a>
+                    </div>
+                `;
+            }
+        }
+        loadAdvertisers();
 
         async function trackAndDisplayVisitors() {
             try {
