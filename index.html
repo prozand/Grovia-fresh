@@ -70,7 +70,7 @@
             transform: scale(1.05);
         }
 
-        /* 20% Bottom Advertising & Stats Zone */
+        /* 20% Bottom Advertising & Stats Zone with Scrolling Marquee */
         .bottom-ad-zone {
             height: 20vh;
             background-color: #f4f7f6;
@@ -83,19 +83,33 @@
             z-index: 2000;
             gap: 20px;
             box-shadow: 0 -2px 6px rgba(0,0,0,0.08);
-            overflow-x: auto;
+            overflow: hidden;
         }
 
-        .footer-ads-container {
+        .footer-ads-viewport {
+            overflow: hidden;
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .footer-ads-track {
             display: flex;
             gap: 15px;
             align-items: center;
-            flex-grow: 1;
-            overflow-x: auto;
-            padding-bottom: 2px;
-            scrollbar-width: none;
+            width: max-content;
+            animation: scrollAdsLeftToRight 25s linear infinite;
         }
-        .footer-ads-container::-webkit-scrollbar { display: none; }
+
+        .footer-ads-track:hover {
+            animation-play-state: paused; /* Pause scrolling when user hovers to read/click */
+        }
+
+        @keyframes scrollAdsLeftToRight {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(0); }
+        }
 
         .footer-ad-card {
             background: white;
@@ -133,6 +147,7 @@
             text-align: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.03);
             flex-shrink: 0;
+            z-index: 10;
         }
         .footer-stats-title { font-weight: bold; color: #388e3c; margin-bottom: 2px; }
         .footer-stats-val { font-weight: bold; color: #e65100; }
@@ -215,8 +230,9 @@
         @media (max-width: 768px) {
             header { padding: 10px 15px; text-align: center; justify-content: center; }
             h1 { font-size: 16px; }
-            .bottom-ad-zone { height: auto; min-height: 15vh; padding: 8px 12px; flex-direction: column; gap: 8px; }
-            .footer-ads-container { width: 100%; justify-content: flex-start; }
+            .bottom-ad-zone { height: auto; min-height: 15vh; padding: 8px 12px; flex-direction: column; gap: 8px; overflow-x: auto; }
+            .footer-ads-viewport { width: 100%; }
+            .footer-ads-track { animation: none; } /* Disable animation on tiny mobile screens if needed for touch scrolling */
             .filter-overlay { left: 15px; top: 10px; right: 15px; }
             .floating-btn-overlay { bottom: 15px; left: 15px; }
             .blue-pill-btn { padding: 10px 16px; font-size: 12px; }
@@ -254,8 +270,10 @@
     </main>
 
     <footer class="bottom-ad-zone">
-        <div id="footer-ads-container" class="footer-ads-container">
-            <!-- Dynamically populated from Supabase advertisers table -->
+        <div class="footer-ads-viewport">
+            <div id="footer-ads-track" class="footer-ads-track">
+                <!-- Dynamically populated and duplicated from Supabase advertisers table for seamless looping -->
+            </div>
         </div>
 
         <div class="footer-stats-box">
@@ -272,19 +290,18 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
         const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // --- FETCH AND RENDER ADVERTISERS INCLUDING PHONE & GRAPHIC LOGO ---
+        // --- FETCH, DUPLICATE & RENDER ADVERTISERS FOR SMOOTH INFINITE SCROLL ---
         async function loadAdvertisers() {
-            const container = document.getElementById('footer-ads-container');
+            const track = document.getElementById('footer-ads-track');
             try {
                 let { data: ads, error } = await dbClient
                     .from('advertisers')
                     .select('*')
-                    .eq('active', true)
-                    .limit(3);
+                    .eq('active', true);
 
                 if (error) throw error;
 
-                let html = '';
+                let cardsHtml = '';
                 let count = 0;
 
                 if (ads && ads.length > 0) {
@@ -301,7 +318,7 @@
                         const btnText = ad.target_url ? 'Visit Site' : 'Contact Us';
                         const btnStyle = ad.target_url ? 'background-color: #e65100;' : '';
 
-                        html += `
+                        cardsHtml += `
                             <div class="footer-ad-card sponsor">
                                 ${logoHtml}
                                 <span><strong>${safeText(ad.business_name)}</strong>${detailsText}</span>
@@ -311,9 +328,9 @@
                     });
                 }
 
-                // Fill remaining slots up to 3 with placeholders if needed
+                // Fill placeholders if fewer than 3 ads exist
                 for (let i = count; i < 3; i++) {
-                    html += `
+                    cardsHtml += `
                         <div class="footer-ad-card">
                             <span>📢 <strong>Advertise Here!</strong> Feature your business.</span>
                             <a href="advertise.html" class="btn-secondary">Contact Us</a>
@@ -321,15 +338,18 @@
                     `;
                 }
 
-                container.innerHTML = html;
+                // Duplicate the cards HTML so the CSS animation loops seamlessly infinitely
+                track.innerHTML = cardsHtml + cardsHtml;
+
             } catch (err) {
                 console.error("Error loading advertisers:", err);
-                container.innerHTML = `
+                const fallbackHtml = `
                     <div class="footer-ad-card">
                         <span>📢 <strong>Advertise Here!</strong> Feature your business.</span>
                         <a href="advertise.html" class="btn-secondary">Contact Us</a>
                     </div>
                 `;
+                track.innerHTML = fallbackHtml + fallbackHtml;
             }
         }
         loadAdvertisers();
