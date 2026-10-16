@@ -1,61 +1,67 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { createClient } = require('@supabase/supabase-js');
 
-exports.handler = async (event) => {
-  // 1. Only allow POST requests
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
-  }
+// Initialize Supabase with service role key (or anon key) to update database rows
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+);
 
+exports.handler = async (event, context) => {
   const sig = event.headers['stripe-signature'];
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
   let stripeEvent;
 
   try {
-    // 2. Verify the event actually came from Stripe
+    // Verify the webhook signature to ensure the request genuinely came from Stripe
     stripeEvent = stripe.webhooks.constructEvent(event.body, sig, webhookSecret);
   } catch (err) {
-    console.error(`Webhook Signature Error: ${err.message}`);
-    return { statusCode: 400, body: `Webhook Error: ${err.message}` };
+    console.error(`Webhook signature verification failed: ${err.message}`);
+    return {
+      statusCode: 400,
+      body: `Webhook Error: ${err.message}`,
+    };
   }
 
-  // 3. Handle the successful payment
+  // Handle the successful checkout session event
   if (stripeEvent.type === 'checkout.session.completed') {
     const session = stripeEvent.data.object;
-    const farmId = session.client_reference_id;
+    const customerEmail = session.customer_details?.email;
 
-    if (farmId) {
-      console.log(`Payment successful! Activating farm ID: ${farmId}`);
+    console.log(`Checkout completed successfully for email: ${customerEmail}`);
 
-      // 4. Connect to Supabase using your Service Role Key
-      const supabaseUrl = process.env.SUPABASE_URL;
-      const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-      const supabase = createClient(supabaseUrl, supabaseKey);
-
-      // 5. Calculate the date exactly 365 days from right now
-      const expirationDate = new Date();
-      expirationDate.setDate(expirationDate.getDate() + 365);
-
-      // 6. Tell Supabase to change Active to true AND save the expiration date
-      const { error } = await supabase
+    if (customerEmail) {
+      // 1. Try updating the 'farms' table
+      const { error: farmError } = await supabase
         .from('farms')
-        .update({ 
-          Active: true,
-          expires_at: expirationDate.toISOString()
-        })
-        .eq('id', farmId);
+        .update({ Active: true })
+        .eq('Email', customerEmail);
 
-      if (error) {
-        console.error('Error updating Supabase:', error.message);
-        return { statusCode: 500, body: 'Error updating database' };
+      if (farmError) {
+        console.error('Supabase farms update error:', farmError);
+      } else {
+        console.log(`Successfully activated farm listing for ${customerEmail}`);
       }
-      
-      console.log('Successfully updated farm in Supabase.');
+
+      // 2. Try updating the 'advertisers' table (just in case it was an ad spot)
+      const { error: adError } = await supabase
+        .from('advertisers')
+        .update({ active: true })
+        .eq('email', customerEmail);
+
+      if (adError) {
+        console.error('Supabase advertisers update error:', adError);
+      } else {
+        console.log(`Successfully activated advertiser listing for ${customerEmail}`);
+      }
     } else {
-      console.log('Payment succeeded, but no Farm ID was attached.');
+      console.warn('Checkout session completed, but no customer email was found.');
     }
   }
 
-  // 7. Return a real 200 OK to Stripe
-  return { statusCode: 200, body: JSON.stringify({ received: true }) };
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ received: true }),
+  };
 };
