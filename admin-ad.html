@@ -187,7 +187,7 @@
                 if (fileInput.files.length > 0) {
                     const file = fileInput.files[0];
                     const fileExt = file.name.split('.').pop();
-                    const fileName = `${Date.now()}_${Math.random().toString(36.substring(2, 9))}.${fileExt}`;
+                    const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
                     const filePath = `${fileName}`;
 
                     let { error: uploadError } = await dbClient.storage
