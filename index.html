@@ -70,7 +70,7 @@
             transform: scale(1.05);
         }
 
-        /* 20% Bottom Advertising & Stats Zone with Scrolling Marquee */
+        /* 20% Bottom Advertising & Stats Zone with Mobile-Friendly Marquee */
         .bottom-ad-zone {
             height: 20vh;
             background-color: #f4f7f6;
@@ -92,6 +92,7 @@
             position: relative;
             display: flex;
             align-items: center;
+            width: 100%;
         }
 
         .footer-ads-track {
@@ -99,16 +100,17 @@
             gap: 15px;
             align-items: center;
             width: max-content;
-            animation: scrollAdsLeftToRight 25s linear infinite;
+            will-change: transform;
+            animation: mobileSafeScroll 30s linear infinite;
         }
 
         .footer-ads-track:hover {
-            animation-play-state: paused; /* Pause scrolling when user hovers to read/click */
+            animation-play-state: paused;
         }
 
-        @keyframes scrollAdsLeftToRight {
-            0% { transform: translateX(-50%); }
-            100% { transform: translateX(0); }
+        @keyframes mobileSafeScroll {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-50%, 0, 0); }
         }
 
         .footer-ad-card {
@@ -230,9 +232,7 @@
         @media (max-width: 768px) {
             header { padding: 10px 15px; text-align: center; justify-content: center; }
             h1 { font-size: 16px; }
-            .bottom-ad-zone { height: auto; min-height: 15vh; padding: 8px 12px; flex-direction: column; gap: 8px; overflow-x: auto; }
-            .footer-ads-viewport { width: 100%; }
-            .footer-ads-track { animation: none; } /* Disable animation on tiny mobile screens if needed for touch scrolling */
+            .bottom-ad-zone { height: auto; min-height: 15vh; padding: 8px 12px; flex-direction: column; gap: 8px; }
             .filter-overlay { left: 15px; top: 10px; right: 15px; }
             .floating-btn-overlay { bottom: 15px; left: 15px; }
             .blue-pill-btn { padding: 10px 16px; font-size: 12px; }
@@ -272,7 +272,7 @@
     <footer class="bottom-ad-zone">
         <div class="footer-ads-viewport">
             <div id="footer-ads-track" class="footer-ads-track">
-                <!-- Dynamically populated and duplicated from Supabase advertisers table for seamless looping -->
+                <!-- Dynamically populated and duplicated from Supabase advertisers table -->
             </div>
         </div>
 
@@ -290,7 +290,7 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_uaolZH8xAaLSPE91nHaIbA_pFKxUEHt';
         const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // --- FETCH, DUPLICATE & RENDER ADVERTISERS FOR SMOOTH INFINITE SCROLL ---
+        // --- FETCH, DUPLICATE & RENDER ADVERTISERS FOR MOBILE-SAFE SCROLLING ---
         async function loadAdvertisers() {
             const track = document.getElementById('footer-ads-track');
             try {
@@ -338,8 +338,8 @@
                     `;
                 }
 
-                // Duplicate the cards HTML so the CSS animation loops seamlessly infinitely
-                track.innerHTML = cardsHtml + cardsHtml;
+                // Duplicate the cards HTML 3 times to ensure the track is wide enough for mobile GPU rendering layers without clipping
+                track.innerHTML = cardsHtml + cardsHtml + cardsHtml;
 
             } catch (err) {
                 console.error("Error loading advertisers:", err);
@@ -349,7 +349,7 @@
                         <a href="advertise.html" class="btn-secondary">Contact Us</a>
                     </div>
                 `;
-                track.innerHTML = fallbackHtml + fallbackHtml;
+                track.innerHTML = fallbackHtml + fallbackHtml + fallbackHtml;
             }
         }
         loadAdvertisers();
